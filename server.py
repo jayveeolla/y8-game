@@ -143,36 +143,46 @@ def save_leaderboard():
         json.dump(snake_leaderboard, f)
 
 @app.route('/')
+@app.route('/gamehub/')
 def index():
     return send_from_directory('.', 'index.html')
 
 @app.route('/tictactoe')
+@app.route('/gamehub/tictactoe')
 def tictactoe():
     return send_from_directory('.', 'tictactoe.html')
 
 @app.route('/snake.html')
+@app.route('/gamehub/snake.html')
 def snake():
     return send_from_directory('.', 'snake.html')
 
 @app.route('/fight.html')
+@app.route('/gamehub/fight.html')
 def fight():
     return send_from_directory('.', 'fight.html')
 
 @app.route('/rumble.html')
+@app.route('/gamehub/rumble.html')
 def rumble():
     return send_from_directory('.', 'rumble.html')
 
 @app.route('/tank.html')
+@app.route('/gamehub/tank.html')
 def tank():
     return send_from_directory('.', 'tank.html')
 
 @app.route('/racing.html')
+@app.route('/gamehub/racing.html')
 def racing():
     return send_from_directory('.', 'racing.html')
 
 @socketio.on('connect')
 def handle_connect():
-    # Don't send game state on connect - let each game handle it
+    # Send tic-tac-toe game state to new clients
+    emit('game_state', game_state)
+    # Send snake leaderboard
+    emit('snake_leaderboard', snake_leaderboard)
     print('Client connected')
 
 @socketio.on('snake_score')
@@ -1017,4 +1027,4 @@ racing_thread = threading.Thread(target=racing_game_loop, daemon=True)
 racing_thread.start()
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=8080, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=8070, debug=True, allow_unsafe_werkzeug=True)

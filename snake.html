@@ -375,7 +375,8 @@
                 scoreElement.textContent = score;
                 
                 generateFood();
-                speed = Math.min(15, 8 + score * 0.2); // Gradually increase speed
+                // Gradually increase speed as snake grows (more noticeable)
+                speed = Math.min(18, 8 + score * 0.3);
             } else {
                 snake.pop();
             }
