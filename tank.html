@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank Battle - Multiplayer</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #000;
+        }
+
+        .game-container {
+            text-align: center;
+        }
+
+        h1 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-shadow: 0 0 10px #FFD700;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            gap: 20px;
+            color: #fff;
+            font-size: 1.1em;
+        }
+
+        .player-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 10px;
+        }
+
+        canvas {
+            border: 3px solid #FFD700;
+            background: #000;
+            display: block;
+            margin: 0 auto;
+            image-rendering: pixelated;
+        }
+
+        .controls {
+            margin-top: 15px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .control-item {
+            display: inline-block;
+            margin: 5px 10px;
+            font-size: 0.9em;
+        }
+
+        .key {
+            background: #FFD700;
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .name-input-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .name-input-modal.hidden {
+            display: none !important;
+        }
+
+        .name-input-box {
+            background: #222;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #FFD700;
+        }
+
+        .name-input-box h2 {
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        .name-input-box input {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+            background: #333;
+            color: #fff;
+        }
+
+        .name-input-box button {
+            background: #FFD700;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .respawn-overlay {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #FFD700;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.5em;
+            z-index: 10;
+            border: 3px solid #FFD700;
+        }
+
+        .respawn-overlay.show {
+            display: block;
+        }
+
+        .respawn-btn {
+            background: #FFD700;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Name Input Modal -->
+    <div class="name-input-modal" id="nameModal">
+        <div class="name-input-box">
+            <h2>🎮 TANK BATTLE</h2>
+            <p style="color: #888; margin-bottom: 15px;">Enter your name to join!</p>
+            <input type="text" id="playerNameInput" placeholder="Your Name" maxlength="20" autofocus />
+            <br>
+            <div style="margin: 20px 0;">
+                <p style="color: #FFD700; margin-bottom: 10px;">Choose Game Mode:</p>
+                <button class="mode-btn" id="pvpBtn" style="margin: 5px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1em;">👥 PvP - Real Players</button>
+                <button class="mode-btn active" id="pveBtn" style="margin: 5px; padding: 10px 20px; background: #FF9800; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1em;">🤖 PvE - With Bots</button>
+            </div>
+            <button id="startBtn">JOIN BATTLE!</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <h1>💥 TANK BATTLE 💥</h1>
+        <div class="info-bar">
+            <div class="player-info">Player: <span id="playerName">-</span></div>
+            <div class="player-info">Kills: <span id="kills">0</span></div>
+            <div class="player-info">Deaths: <span id="deaths">0</span></div>
+        </div>
+
+        <div style="position: relative; display: inline-block;">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            
+            <div class="respawn-overlay" id="respawnOverlay">
+                <div>💀 YOU DIED! 💀</div>
+                <button class="respawn-btn" id="respawnBtn">RESPAWN</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-item"><span class="key">WASD</span> or <span class="key">Arrows</span> Move</div>
+            <div class="control-item"><span class="key">SPACE</span> Shoot</div>
+            <div class="control-item">💥 Destroy tanks & walls!</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const playerNameElement = document.getElementById('playerName');
+        const killsElement = document.getElementById('kills');
+        const deathsElement = document.getElementById('deaths');
+        const nameModal = document.getElementById('nameModal');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const startBtn = document.getElementById('startBtn');
+        const respawnOverlay = document.getElementById('respawnOverlay');
+        const respawnBtn = document.getElementById('respawnBtn');
+        const pvpBtn = document.getElementById('pvpBtn');
+        const pveBtn = document.getElementById('pveBtn');
+
+        const socket = io();
+        
+        let myPlayerId = null;
+        let myPlayerName = '';
+        let gameMode = 'pve'; // 'pvp' or 'pve'
+        let gameState = {
+            tanks: {},
+            bullets: {},
+            walls: []
+        };
+        let keys = {};
+        let lastShootTime = 0;
+        let shootCooldown = 300; // 300ms between shots
+        let animationFrameId = null;
+
+        socket.on('player_id', (id) => {
+            myPlayerId = id;
+            console.log('Received player ID:', id);
+        });
+
+        socket.on('game_state', (state) => {
+            gameState = state;
+            console.log('Received game state:', state);
+            updateUI();
+        });
+
+        // Start animation loop
+        function animate() {
+            draw();
+            animationFrameId = requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Controls
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            keys[key] = true;
+            
+            if (e.key === ' ') {
+                const now = Date.now();
+                if (now - lastShootTime >= shootCooldown) {
+                    socket.emit('tank_shoot');
+                    lastShootTime = now;
+                }
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Send movement - optimized to reduce lag
+        let lastDirection = null;
+        setInterval(() => {
+            if (!myPlayerId || !gameState.tanks) return;
+            
+            const myTank = gameState.tanks[myPlayerId];
+            if (!myTank || !myTank.alive) return;
+            
+            let direction = null;
+            
+            if (keys['w'] || keys['arrowup']) direction = 'up';
+            else if (keys['s'] || keys['arrowdown']) direction = 'down';
+            else if (keys['a'] || keys['arrowleft']) direction = 'left';
+            else if (keys['d'] || keys['arrowright']) direction = 'right';
+            
+            if (direction) {
+                console.log('Sending movement:', direction);
+                socket.emit('tank_move', { direction });
+                lastDirection = direction;
+            } else {
+                lastDirection = null;
+            }
+        }, 40); // Slightly faster updates for smoother movement
+
+        function updateUI() {
+            if (!gameState.tanks || !myPlayerId) return;
+            
+            const myTank = gameState.tanks[myPlayerId];
+            if (myTank) {
+                killsElement.textContent = myTank.kills;
+                deathsElement.textContent = myTank.deaths;
+                
+                if (!myTank.alive && !respawnOverlay.classList.contains('show')) {
+                    respawnOverlay.classList.add('show');
+                }
+            }
+        }
+
+        function draw() {
+            // Clear
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // Draw walls
+            if (gameState.walls) {
+                gameState.walls.forEach(wall => {
+                    ctx.fillStyle = '#8B4513';
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    
+                    // Brick pattern
+                    ctx.strokeStyle = '#654321';
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < wall.height; i += 10) {
+                        ctx.beginPath();
+                        ctx.moveTo(wall.x, wall.y + i);
+                        ctx.lineTo(wall.x + wall.width, wall.y + i);
+                        ctx.stroke();
+                    }
+                });
+            }
+            
+            // Draw bullets
+            if (gameState.bullets) {
+                Object.values(gameState.bullets).forEach(bullet => {
+                    ctx.fillStyle = '#FFFF00';
+                    ctx.beginPath();
+                    ctx.arc(bullet.x, bullet.y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+            
+            // Draw tanks
+            if (gameState.tanks) {
+                Object.values(gameState.tanks).forEach(tank => {
+                if (!tank.alive) return;
+                
+                ctx.save();
+                ctx.translate(tank.x, tank.y);
+                
+                // Rotate tank based on direction
+                if (tank.direction === 'up') ctx.rotate(0);
+                else if (tank.direction === 'down') ctx.rotate(Math.PI);
+                else if (tank.direction === 'left') ctx.rotate(-Math.PI / 2);
+                else if (tank.direction === 'right') ctx.rotate(Math.PI / 2);
+                
+                // Draw tank body
+                ctx.fillStyle = tank.id === myPlayerId ? '#00FF00' : tank.color;
+                ctx.fillRect(-15, -15, 30, 30);
+                
+                // Draw tank barrel
+                ctx.fillStyle = '#333';
+                ctx.fillRect(-3, -20, 6, 10);
+                
+                ctx.restore();
+                
+                // Name
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(tank.name, tank.x, tank.y - 25);
+            });
+            }
+        }
+
+        function joinGame() {
+            const name = playerNameInput.value.trim();
+            if (name === '') {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            myPlayerName = name;
+            playerNameElement.textContent = myPlayerName;
+            nameModal.classList.add('hidden');
+            
+            socket.emit('join_tank_game', { name: myPlayerName, mode: gameMode });
+        }
+
+        function respawn() {
+            socket.emit('respawn_tank');
+            respawnOverlay.classList.remove('show');
+        }
+
+        // Mode selection
+        pvpBtn.addEventListener('click', () => {
+            gameMode = 'pvp';
+            pvpBtn.style.background = '#4CAF50';
+            pvpBtn.style.transform = 'scale(1.1)';
+            pveBtn.style.background = '#666';
+            pveBtn.style.transform = 'scale(1)';
+        });
+
+        pveBtn.addEventListener('click', () => {
+            gameMode = 'pve';
+            pveBtn.style.background = '#FF9800';
+            pveBtn.style.transform = 'scale(1.1)';
+            pvpBtn.style.background = '#666';
+            pvpBtn.style.transform = 'scale(1)';
+        });
+
+        startBtn.addEventListener('click', joinGame);
+        respawnBtn.addEventListener('click', respawn);
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinGame();
+        });
+
+        draw();
+    </script>
+</body>
+</html>

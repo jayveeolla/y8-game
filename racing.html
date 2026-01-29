@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Racing Battle - Multiplayer</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .game-container {
+            text-align: center;
+        }
+
+        h1 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { text-shadow: 0 0 20px #00ff00; }
+            50% { text-shadow: 0 0 40px #00ff00, 0 0 60px #00ff00; }
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            gap: 20px;
+            color: #fff;
+            font-size: 1.1em;
+        }
+
+        .player-info {
+            background: rgba(0, 255, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+        }
+
+        canvas {
+            border: 3px solid #00ff00;
+            background: #1a1a1a;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            image-rendering: optimizeSpeed;
+        }
+
+        .controls {
+            margin-top: 15px;
+            color: #fff;
+            background: rgba(0, 255, 0, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+        }
+
+        .control-item {
+            display: inline-block;
+            margin: 5px 10px;
+            font-size: 0.9em;
+        }
+
+        .key {
+            background: #00ff00;
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .name-input-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .name-input-modal.hidden {
+            display: none !important;
+        }
+
+        .name-input-box {
+            background: #16213e;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.3);
+        }
+
+        .name-input-box h2 {
+            color: #00ff00;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .name-input-box input {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .name-input-box button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .name-input-box button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .winner-overlay {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: #FFD700;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 2em;
+            z-index: 10;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+        }
+
+        .winner-overlay.show {
+            display: block;
+        }
+
+        .legend {
+            margin-top: 10px;
+            color: #888;
+            font-size: 0.85em;
+        }
+
+        .legend span {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Name Input Modal -->
+    <div class="name-input-modal" id="nameModal">
+        <div class="name-input-box">
+            <h2>🏁 RACING BATTLE 🏁</h2>
+            <p style="color: #888; margin-bottom: 15px;">Enter your name to race!</p>
+            <input type="text" id="playerNameInput" placeholder="Your Name" maxlength="20" autofocus />
+            <br>
+            <button id="startBtn">START RACING!</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <h1>🏎️ RACING BATTLE 🏁</h1>
+        <div class="info-bar">
+            <div class="player-info">Player: <span id="playerName">-</span></div>
+            <div class="player-info">Lap: <span id="lap">0</span>/3</div>
+            <div class="player-info">Position: <span id="position">-</span></div>
+        </div>
+
+        <div style="position: relative; display: inline-block;">
+            <canvas id="gameCanvas" width="1000" height="700"></canvas>
+            
+            <div class="winner-overlay" id="winnerOverlay">
+                <div id="winnerText">🏆 WINNER! 🏆</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-item"><span class="key">WASD</span> or <span class="key">Arrows</span> Control Car</div>
+            <div class="control-item">🟢 <span style="color: #0f0;">Speed Boost</span></div>
+            <div class="control-item">🔴 <span style="color: #f00;">Oil Slick - Slows Down!</span></div>
+        </div>
+        <div class="legend">
+            <span>First to complete 3 laps wins!</span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const playerNameElement = document.getElementById('playerName');
+        const lapElement = document.getElementById('lap');
+        const positionElement = document.getElementById('position');
+        const nameModal = document.getElementById('nameModal');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const startBtn = document.getElementById('startBtn');
+        const winnerOverlay = document.getElementById('winnerOverlay');
+        const winnerText = document.getElementById('winnerText');
+
+        const socket = io();
+        
+        let myPlayerId = null;
+        let myPlayerName = '';
+        let gameState = {
+            cars: {},
+            track: null,
+            speedBoosts: [],
+            oilSlicks: [],
+            trackPath: []
+        };
+        let keys = {};
+        let camera = { x: 0, y: 0 };
+
+        socket.on('player_id', (id) => {
+            myPlayerId = id;
+        });
+
+        socket.on('game_state', (state) => {
+            gameState = state;
+            updateUI();
+            draw();
+        });
+
+        socket.on('race_finished', (data) => {
+            winnerText.textContent = `🏆 ${data.winner} WINS! 🏆`;
+            winnerOverlay.classList.add('show');
+            
+            setTimeout(() => {
+                winnerOverlay.classList.remove('show');
+            }, 5000);
+        });
+
+        // Controls
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Send input
+        setInterval(() => {
+            if (!myPlayerId) return;
+            
+            const input = {
+                up: keys['w'] || keys['arrowup'] || false,
+                down: keys['s'] || keys['arrowdown'] || false,
+                left: keys['a'] || keys['arrowleft'] || false,
+                right: keys['d'] || keys['arrowright'] || false
+            };
+            
+            socket.emit('race_input', input);
+        }, 30);
+
+        function updateUI() {
+            if (!gameState.cars || !myPlayerId) return;
+            
+            const myCar = gameState.cars[myPlayerId];
+            if (myCar) {
+                lapElement.textContent = myCar.lap;
+                
+                // Calculate position
+                const sortedCars = Object.values(gameState.cars).sort((a, b) => {
+                    if (b.lap !== a.lap) return b.lap - a.lap;
+                    return b.checkpoints - a.checkpoints;
+                });
+                const position = sortedCars.findIndex(car => car.id === myPlayerId) + 1;
+                positionElement.textContent = position + '/' + sortedCars.length;
+            }
+        }
+
+        function draw() {
+            // Update camera to follow player
+            if (myPlayerId && gameState.cars && gameState.cars[myPlayerId]) {
+                const myCar = gameState.cars[myPlayerId];
+                camera.x = myCar.x - canvas.width / 2;
+                camera.y = myCar.y - canvas.height / 2;
+            }
+            
+            // Clear
+            ctx.fillStyle = '#1a5f1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+            
+            if (!gameState.track || !gameState.trackPath) {
+                ctx.restore();
+                return;
+            }
+            
+            const path = gameState.trackPath;
+            
+            // Draw grass/background
+            ctx.fillStyle = '#2d5a2d';
+            ctx.fillRect(0, 0, 2000, 2000);
+            
+            // Draw track outer edge (darker)
+            ctx.fillStyle = '#444';
+            ctx.beginPath();
+            if (path.outer && path.outer.length > 0) {
+                ctx.moveTo(path.outer[0].x, path.outer[0].y);
+                for (let i = 1; i < path.outer.length; i++) {
+                    ctx.lineTo(path.outer[i].x, path.outer[i].y);
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Draw track inner edge (racing surface)
+            ctx.fillStyle = '#3a3a3a';
+            ctx.beginPath();
+            if (path.inner && path.inner.length > 0) {
+                ctx.moveTo(path.inner[0].x, path.inner[0].y);
+                for (let i = 1; i < path.inner.length; i++) {
+                    ctx.lineTo(path.inner[i].x, path.inner[i].y);
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Draw track kerbs (red/white stripes)
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 8;
+            ctx.setLineDash([20, 20]);
+            if (path.outer && path.outer.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(path.outer[0].x, path.outer[0].y);
+                for (let i = 1; i < path.outer.length; i++) {
+                    ctx.lineTo(path.outer[i].x, path.outer[i].y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+            
+            // Red kerb
+            ctx.strokeStyle = '#f00';
+            ctx.lineWidth = 6;
+            if (path.inner && path.inner.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(path.inner[0].x, path.inner[0].y);
+                for (let i = 1; i < path.inner.length; i++) {
+                    ctx.lineTo(path.inner[i].x, path.inner[i].y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+            
+            // Draw center line
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([30, 20]);
+            if (path.center && path.center.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(path.center[0].x, path.center[0].y);
+                for (let i = 1; i < path.center.length; i++) {
+                    ctx.lineTo(path.center[i].x, path.center[i].y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+            
+            // Draw finish line
+            if (path.finish) {
+                const f = path.finish;
+                ctx.fillStyle = '#fff';
+                for (let i = 0; i < 10; i++) {
+                    const offset = i * 15;
+                    ctx.fillRect(f.x + offset, f.y, 15, 60);
+                }
+                ctx.fillStyle = '#000';
+                for (let i = 0; i < 10; i++) {
+                    const offset = i * 15 + 7.5;
+                    ctx.fillRect(f.x + offset, f.y, 15, 60);
+                }
+                
+                // Finish text
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 40px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('FINISH', f.x + 75, f.y - 20);
+            }
+            
+            // Draw speed boosts
+            if (gameState.speedBoosts) {
+                gameState.speedBoosts.forEach(boost => {
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+                    ctx.fillRect(boost.x, boost.y, boost.width, boost.height);
+                    ctx.strokeStyle = '#0f0';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(boost.x, boost.y, boost.width, boost.height);
+                    
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 30px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('⚡', boost.x + boost.width/2, boost.y + boost.height/2 + 10);
+                });
+            }
+            
+            // Draw oil slicks
+            if (gameState.oilSlicks) {
+                gameState.oilSlicks.forEach(oil => {
+                    ctx.fillStyle = 'rgba(80, 40, 0, 0.9)';
+                    ctx.beginPath();
+                    ctx.ellipse(oil.x + oil.width/2, oil.y + oil.height/2, oil.width/2, oil.height/2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#8B4513';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                });
+            }
+            
+            // Draw cars
+            if (gameState.cars) {
+                Object.values(gameState.cars).forEach(car => {
+                    ctx.save();
+                    ctx.translate(car.x, car.y);
+                    ctx.rotate(car.angle);
+                    
+                    const carColor = car.id === myPlayerId ? '#00ff00' : car.color;
+                    
+                    // Draw F1 style race car
+                    // Rear wing
+                    ctx.fillStyle = '#222';
+                    ctx.fillRect(-18, -3, 4, 6);
+                    
+                    // Rear tires
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(-15, -10, 6, 4);
+                    ctx.fillRect(-15, 6, 6, 4);
+                    
+                    // Main body
+                    ctx.fillStyle = carColor;
+                    ctx.beginPath();
+                    ctx.moveTo(-12, 0);
+                    ctx.lineTo(-8, -8);
+                    ctx.lineTo(10, -8);
+                    ctx.lineTo(16, -4);
+                    ctx.lineTo(16, 4);
+                    ctx.lineTo(10, 8);
+                    ctx.lineTo(-8, 8);
+                    ctx.lineTo(-12, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Cockpit (darker)
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    ctx.beginPath();
+                    ctx.ellipse(-2, 0, 6, 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Front tires
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(8, -10, 6, 4);
+                    ctx.fillRect(8, 6, 6, 4);
+                    
+                    // Front wing
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(16, -6);
+                    ctx.lineTo(18, -8);
+                    ctx.moveTo(16, 6);
+                    ctx.lineTo(18, 8);
+                    ctx.stroke();
+                    
+                    // Racing stripes
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(-6, -2);
+                    ctx.lineTo(8, -2);
+                    ctx.moveTo(-6, 2);
+                    ctx.lineTo(8, 2);
+                    ctx.stroke();
+                    
+                    // Number on car
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(car.lap + 1, -2, 3);
+                    
+                    ctx.restore();
+                    
+                    // Name
+                    ctx.fillStyle = car.id === myPlayerId ? '#00ff00' : '#ffffff';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 3;
+                    ctx.strokeText(car.name, car.x, car.y - 30);
+                    ctx.fillText(car.name, car.x, car.y - 30);
+                    
+                    // Lap indicator
+                    ctx.font = 'bold 12px Arial';
+                    ctx.fillStyle = '#FFD700';
+                    ctx.strokeText(`Lap ${car.lap}/3`, car.x, car.y + 35);
+                    ctx.fillText(`Lap ${car.lap}/3`, car.x, car.y + 35);
+                });
+            }
+            
+            ctx.restore();
+            
+            // Draw minimap
+            drawMinimap();
+        }
+        
+        function drawMinimap() {
+            const minimapSize = 150;
+            const minimapX = canvas.width - minimapSize - 20;
+            const minimapY = 20;
+            const scale = 0.1;  // Adjusted for bigger map
+            
+            // Background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(minimapX, minimapY, minimapSize, minimapSize);
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(minimapX, minimapY, minimapSize, minimapSize);
+            
+            // Draw track on minimap
+            ctx.save();
+            ctx.translate(minimapX, minimapY);
+            
+            if (gameState.trackPath && gameState.trackPath.center) {
+                ctx.strokeStyle = '#666';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                const path = gameState.trackPath.center;
+                if (path.length > 0) {
+                    ctx.moveTo(path[0].x * scale, path[0].y * scale);
+                    for (let i = 1; i < path.length; i++) {
+                        ctx.lineTo(path[i].x * scale, path[i].y * scale);
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw cars on minimap
+            if (gameState.cars) {
+                Object.values(gameState.cars).forEach(car => {
+                    ctx.fillStyle = car.id === myPlayerId ? '#00ff00' : '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(car.x * scale, car.y * scale, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+            
+            ctx.restore();
+        }
+
+        function joinGame() {
+            const name = playerNameInput.value.trim();
+            if (name === '') {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            myPlayerName = name;
+            playerNameElement.textContent = myPlayerName;
+            nameModal.classList.add('hidden');
+            
+            socket.emit('join_race', { name: myPlayerName });
+        }
+
+        startBtn.addEventListener('click', joinGame);
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinGame();
+        });
+
+        // Start animation loop
+        function animate() {
+            draw();
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

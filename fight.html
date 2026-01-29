@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Street Fighter - 1v1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            overflow: hidden;
+        }
+
+        .game-container {
+            text-align: center;
+            width: 900px;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #ff6b6b;
+        }
+
+        .health-bars {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .player-health, .enemy-health {
+            flex: 1;
+        }
+
+        .health-label {
+            color: #fff;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .health-bar-container {
+            background: #333;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #555;
+        }
+
+        .health-bar {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .player-health .health-bar {
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+        }
+
+        .enemy-health .health-bar {
+            background: linear-gradient(90deg, #f44336 0%, #ff5722 100%);
+        }
+
+        canvas {
+            border: 5px solid #444;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #87CEEB 0%, #98D8C8 50%, #8B7355 100%);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .controls {
+            margin-top: 20px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .control-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.95em;
+        }
+
+        .key {
+            background: #ff6b6b;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 2em;
+            z-index: 10;
+            border: 5px solid #ff6b6b;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: popIn 0.3s ease;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .round-info {
+            color: #fff;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🥊 STREET FIGHTER 🥊</h1>
+        <div class="round-info">Round <span id="round">1</span></div>
+        
+        <div class="health-bars">
+            <div class="player-health">
+                <div class="health-label">👤 PLAYER</div>
+                <div class="health-bar-container">
+                    <div class="health-bar" id="playerHealth" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="enemy-health">
+                <div class="health-label">🤖 COMPUTER</div>
+                <div class="health-bar-container">
+                    <div class="health-bar" id="enemyHealth" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas" width="900" height="500"></canvas>
+
+        <div class="controls">
+            <div style="font-size: 1.2em; margin-bottom: 10px;">🎮 CONTROLS</div>
+            <div class="control-grid">
+                <div class="control-item">
+                    <span class="key">A</span> or <span class="key">←</span> Move Left
+                </div>
+                <div class="control-item">
+                    <span class="key">D</span> or <span class="key">→</span> Move Right
+                </div>
+                <div class="control-item">
+                    <span class="key">J</span> 👊 SUNTOK (Punch)
+                </div>
+                <div class="control-item">
+                    <span class="key">K</span> 🦵 SIPA (Kick)
+                </div>
+                <div class="control-item">
+                    <span class="key">L</span> ⚔️ TALON (Slash)
+                </div>
+                <div class="control-item">
+                    <span class="key">S</span> or <span class="key">↓</span> 💨 SLIDE
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <div id="winnerText">YOU WIN!</div>
+        <button class="restart-btn" id="restartBtn">Play Again</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const playerHealthBar = document.getElementById('playerHealth');
+        const enemyHealthBar = document.getElementById('enemyHealth');
+        const gameOverElement = document.getElementById('gameOver');
+        const winnerText = document.getElementById('winnerText');
+        const restartBtn = document.getElementById('restartBtn');
+        const roundElement = document.getElementById('round');
+
+        // Game state
+        let gameRunning = true;
+        let round = 1;
+
+        // Player
+        const player = {
+            x: 150,
+            y: 350,
+            width: 60,
+            height: 100,
+            health: 100,
+            maxHealth: 100,
+            velocityX: 0,
+            attacking: false,
+            attackType: null,
+            attackFrame: 0,
+            color: '#4CAF50'
+        };
+
+        // Enemy
+        const enemy = {
+            x: 700,
+            y: 350,
+            width: 60,
+            height: 100,
+            health: 100,
+            maxHealth: 100,
+            velocityX: 0,
+            attacking: false,
+            attackType: null,
+            attackFrame: 0,
+            color: '#f44336',
+            aiTimer: 0,
+            aiCooldown: 0
+        };
+
+        // Controls
+        const keys = {};
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            
+            if (!player.attacking) {
+                if (e.key.toLowerCase() === 'j') {
+                    performAttack(player, 'punch');
+                } else if (e.key.toLowerCase() === 'k') {
+                    performAttack(player, 'kick');
+                } else if (e.key.toLowerCase() === 'l') {
+                    performAttack(player, 'slash');
+                } else if (e.key.toLowerCase() === 's' || e.key === 'ArrowDown') {
+                    performAttack(player, 'slide');
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        function performAttack(fighter, type) {
+            fighter.attacking = true;
+            fighter.attackType = type;
+            fighter.attackFrame = 0;
+        }
+
+        function updatePlayer() {
+            if (!player.attacking) {
+                player.velocityX = 0;
+                
+                if (keys['a'] || keys['arrowleft']) {
+                    player.velocityX = -5;
+                }
+                if (keys['d'] || keys['arrowright']) {
+                    player.velocityX = 5;
+                }
+                
+                player.x += player.velocityX;
+                player.x = Math.max(50, Math.min(canvas.width / 2 - 50, player.x));
+            }
+
+            if (player.attacking) {
+                player.attackFrame++;
+                
+                const attackDuration = player.attackType === 'slide' ? 20 : 15;
+                
+                if (player.attackFrame === 8) {
+                    checkHit(player, enemy);
+                }
+                
+                if (player.attackFrame >= attackDuration) {
+                    player.attacking = false;
+                    player.attackType = null;
+                    player.attackFrame = 0;
+                }
+            }
+        }
+
+        function updateEnemy() {
+            if (!enemy.attacking) {
+                enemy.aiCooldown--;
+                enemy.aiTimer++;
+                
+                // Simple AI
+                const distanceToPlayer = Math.abs(enemy.x - player.x);
+                
+                if (distanceToPlayer > 200) {
+                    enemy.velocityX = player.x < enemy.x ? -3 : 3;
+                } else if (distanceToPlayer < 150) {
+                    enemy.velocityX = player.x < enemy.x ? 2 : -2;
+                } else {
+                    enemy.velocityX = 0;
+                }
+                
+                enemy.x += enemy.velocityX;
+                enemy.x = Math.max(canvas.width / 2 + 50, Math.min(canvas.width - 100, enemy.x));
+                
+                // AI attacks randomly
+                if (enemy.aiCooldown <= 0 && distanceToPlayer < 180 && Math.random() < 0.03) {
+                    const attacks = ['punch', 'kick', 'slash', 'slide'];
+                    performAttack(enemy, attacks[Math.floor(Math.random() * attacks.length)]);
+                    enemy.aiCooldown = 60 + Math.random() * 60;
+                }
+            }
+
+            if (enemy.attacking) {
+                enemy.attackFrame++;
+                
+                const attackDuration = enemy.attackType === 'slide' ? 20 : 15;
+                
+                if (enemy.attackFrame === 8) {
+                    checkHit(enemy, player);
+                }
+                
+                if (enemy.attackFrame >= attackDuration) {
+                    enemy.attacking = false;
+                    enemy.attackType = null;
+                    enemy.attackFrame = 0;
+                }
+            }
+        }
+
+        function checkHit(attacker, target) {
+            const attackRange = attacker.attackType === 'slash' ? 150 : 
+                               attacker.attackType === 'slide' ? 180 : 120;
+            
+            const distance = Math.abs(attacker.x - target.x);
+            
+            if (distance < attackRange) {
+                let damage = 0;
+                switch(attacker.attackType) {
+                    case 'punch': damage = 8; break;
+                    case 'kick': damage = 12; break;
+                    case 'slash': damage = 15; break;
+                    case 'slide': damage = 10; break;
+                }
+                
+                target.health -= damage;
+                target.health = Math.max(0, target.health);
+                
+                // Update health bars
+                if (target === player) {
+                    playerHealthBar.style.width = (player.health / player.maxHealth * 100) + '%';
+                } else {
+                    enemyHealthBar.style.width = (enemy.health / enemy.maxHealth * 100) + '%';
+                }
+                
+                // Check for knockout
+                if (target.health <= 0) {
+                    endGame(attacker === player);
+                }
+            }
+        }
+
+        function drawFighter(fighter, isPlayer) {
+            ctx.save();
+            
+            if (!isPlayer) {
+                ctx.translate(fighter.x + fighter.width / 2, 0);
+                ctx.scale(-1, 1);
+                ctx.translate(-(fighter.x + fighter.width / 2), 0);
+            }
+            
+            // Body
+            ctx.fillStyle = fighter.color;
+            ctx.fillRect(fighter.x, fighter.y, fighter.width, fighter.height);
+            
+            // Head
+            ctx.fillStyle = '#FFE0BD';
+            ctx.beginPath();
+            ctx.arc(fighter.x + fighter.width / 2, fighter.y - 20, 25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eyes
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(fighter.x + fighter.width / 2 - 8, fighter.y - 25, 3, 0, Math.PI * 2);
+            ctx.arc(fighter.x + fighter.width / 2 + 8, fighter.y - 25, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Attack animations
+            if (fighter.attacking) {
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.6)';
+                
+                if (fighter.attackType === 'punch') {
+                    ctx.fillRect(fighter.x + fighter.width, fighter.y + 30, 40, 15);
+                    ctx.fillText('👊', fighter.x + fighter.width + 40, fighter.y + 40);
+                } else if (fighter.attackType === 'kick') {
+                    ctx.fillRect(fighter.x + fighter.width, fighter.y + 60, 50, 20);
+                    ctx.fillText('🦵', fighter.x + fighter.width + 50, fighter.y + 75);
+                } else if (fighter.attackType === 'slash') {
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.moveTo(fighter.x + fighter.width, fighter.y + 20);
+                    ctx.lineTo(fighter.x + fighter.width + 70, fighter.y + 80);
+                    ctx.stroke();
+                    ctx.fillText('⚔️', fighter.x + fighter.width + 60, fighter.y + 50);
+                } else if (fighter.attackType === 'slide') {
+                    ctx.fillStyle = 'rgba(150, 150, 255, 0.5)';
+                    ctx.fillRect(fighter.x + fighter.width, fighter.y + 70, 60, 30);
+                    ctx.fillText('💨', fighter.x + fighter.width + 60, fighter.y + 90);
+                }
+            }
+            
+            ctx.restore();
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = 'linear-gradient(180deg, #87CEEB 0%, #98D8C8 50%, #8B7355 100%)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw ground
+            ctx.fillStyle = '#6B4423';
+            ctx.fillRect(0, 450, canvas.width, 50);
+            
+            // Draw center line
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw fighters
+            drawFighter(player, true);
+            drawFighter(enemy, false);
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            updatePlayer();
+            updateEnemy();
+            draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame(playerWon) {
+            gameRunning = false;
+            winnerText.textContent = playerWon ? '🎉 YOU WIN! 🎉' : '💀 YOU LOSE! 💀';
+            gameOverElement.classList.add('show');
+        }
+
+        function restartGame() {
+            // Reset player
+            player.x = 150;
+            player.y = 350;
+            player.health = 100;
+            player.velocityX = 0;
+            player.attacking = false;
+            
+            // Reset enemy
+            enemy.x = 700;
+            enemy.y = 350;
+            enemy.health = 100;
+            enemy.velocityX = 0;
+            enemy.attacking = false;
+            enemy.aiCooldown = 0;
+            
+            // Reset health bars
+            playerHealthBar.style.width = '100%';
+            enemyHealthBar.style.width = '100%';
+            
+            // Restart game
+            gameRunning = true;
+            round++;
+            roundElement.textContent = round;
+            gameOverElement.classList.remove('show');
+            gameLoop();
+        }
+
+        restartBtn.addEventListener('click', restartGame);
+
+        // Start game
+        gameLoop();
+    </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - Multiplayer</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .status {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+            font-weight: bold;
+            min-height: 40px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-template-rows: repeat(3, 120px);
+            gap: 10px;
+            margin: 0 auto 30px;
+            justify-content: center;
+        }
+
+        .cell {
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .cell:hover:not(.taken) {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .cell.x {
+            color: #667eea;
+        }
+
+        .cell.o {
+            color: #764ba2;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            font-weight: bold;
+        }
+
+        .reset-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        .winner {
+            animation: celebrate 0.5s ease;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        <div class="status" id="status">Player X's Turn</div>
+        <div class="board" id="board">
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+        <button class="reset-btn" id="resetBtn">New Game</button>
+    </div>
+
+    <script>
+        const cells = document.querySelectorAll('.cell');
+        const status = document.getElementById('status');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+// Connect to Socket.IO server
+        const socket = io();
+
+        // Receive game state updates from server
+        socket.on('game_state', (state) => {
+            gameBoard = state.board;
+            currentPlayer = state.currentPlayer;
+            gameActive = state.gameActive;
+            updateUI();
+        });
+
+        function updateUI() {
+            // Update all cells
+            cells.forEach((cell, index) => {
+                const value = gameBoard[index];
+                cell.textContent = value;
+                
+                // Remove old classes
+                cell.classList.remove('taken', 'x', 'o');
+                
+                // Add new classes if cell is filled
+                if (value !== '') {
+                    cell.classList.add('taken');
+                    cell.classList.add(value.toLowerCase());
+                }
+            });
+
+            // Update status
+            status.classList.remove('winner');
+            if (!gameActive) {
+                const winner = checkWinner();
+                if (winner) {
+                    status.textContent = `Player ${winner} Wins!`;
+                    status.classList.add('winner');
+                } else {
+                    status.textContent = "It's a Draw!";
+                }
+            } else {
+                status.textContent = `Player ${currentPlayer}'s Turn`;
+            }
+        }
+
+        function checkWinner() {
+            const winningConditions = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (gameBoard[a] !== '' && 
+                    gameBoard[a] === gameBoard[b] && 
+                    gameBoard[b] === gameBoard[c]) {
+                    return gameBoard[a];
+                }
+            }
+            return null;
+        }
+
+        function handleCellClick(e) {
+            const cell = e.target;
+            const index = parseInt(cell.getAttribute('data-index'));
+
+            if (gameBoard[index] !== '' || !gameActive) {
+                return;
+            }
+
+            // Send move to server
+            socket.emit('make_move', {
+                index: index,
+                player: currentPlayer
+            });
+        }
+
+        function resetGame() {
+            // Send reset request to server
+            socket.emit('reset_game');
+        }
+
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        resetBtn.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>

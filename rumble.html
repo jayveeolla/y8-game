@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Rumble - Multiplayer Battle</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            overflow: hidden;
+        }
+
+        .game-container {
+            text-align: center;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #e74c3c;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            gap: 30px;
+            color: #fff;
+            font-size: 1.2em;
+        }
+
+        .player-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 15px;
+        }
+
+        canvas {
+            border: 5px solid #e74c3c;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #87CEEB 0%, #98D8C8 50%, #8B7355 100%);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .controls {
+            margin-top: 15px;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 900px;
+        }
+
+        .control-grid {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 20px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .key {
+            background: #e74c3c;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .name-input-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .name-input-modal.hidden {
+            display: none !important;
+        }
+
+        .name-input-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .name-input-box h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .name-input-box input {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+
+        .name-input-box button {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 2em;
+            z-index: 10;
+            border: 5px solid #e74c3c;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: popIn 0.3s ease;
+        }
+
+        .respawn-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .respawn-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .players-list {
+            color: #fff;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            margin: 5px 0;
+        }
+
+        .player-item.eliminated {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Name Input Modal -->
+    <div class="name-input-modal" id="nameModal">
+        <div class="name-input-box">
+            <h2>👑 Enter Your Name</h2>
+            <p style="color: #666; margin-bottom: 15px;">Join the Royal Rumble!</p>
+            <input type="text" id="playerNameInput" placeholder="Your Name" maxlength="20" autofocus />
+            <br>
+            <button id="startBtn">Join Battle!</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <h1>👑 ROYAL RUMBLE 👑</h1>
+        <div class="info-bar">
+            <div class="player-info">Player: <span id="playerName">Guest</span></div>
+            <div class="player-info">HP: <span id="playerHP">100</span></div>
+            <div class="player-info">Players Alive: <span id="playersAlive">0</span></div>
+        </div>
+
+        <canvas id="gameCanvas" width="900" height="600"></canvas>
+
+        <div class="controls">
+            <div style="font-size: 1.1em; margin-bottom: 8px;">🎮 CONTROLS</div>
+            <div class="control-grid">
+                <div class="control-item">
+                    <span class="key">WASD</span> or <span class="key">Arrows</span> Move
+                </div>
+                <div class="control-item">
+                    <span class="key">SPACE</span> Attack/Push
+                </div>
+                <div class="control-item">
+                    💥 Push enemies off the edge! 🏆
+                </div>
+            </div>
+        </div>
+
+        <div class="players-list" id="playersList">
+            <h3>👥 Players</h3>
+            <div id="playersListContent"></div>
+        </div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <div id="winnerText">YOU WIN!</div>
+        <button class="respawn-btn" id="respawnBtn">Respawn</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const playerNameElement = document.getElementById('playerName');
+        const playerHPElement = document.getElementById('playerHP');
+        const playersAliveElement = document.getElementById('playersAlive');
+        const gameOverElement = document.getElementById('gameOver');
+        const winnerText = document.getElementById('winnerText');
+        const nameModal = document.getElementById('nameModal');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const startBtn = document.getElementById('startBtn');
+        const playersListContent = document.getElementById('playersListContent');
+        const respawnBtn = document.getElementById('respawnBtn');
+
+        // Connect to Socket.IO server
+        const socket = io();
+        
+        let myPlayerId = null;
+        let myPlayerName = '';
+        let players = {};
+        let keys = {};
+
+        // Receive player ID from server
+        socket.on('player_id', (id) => {
+            myPlayerId = id;
+        });
+
+        // Receive game state updates
+        socket.on('game_state', (state) => {
+            players = state.players;
+            updateUI();
+            draw();
+        });
+
+        // Game over notification
+        socket.on('game_over', (data) => {
+            winnerText.textContent = data.winner === myPlayerName ? 
+                '👑 YOU WIN! 👑' : 
+                `💀 YOU DIED! 💀`;
+            gameOverElement.classList.add('show');
+        });
+
+        // Player respawned
+        socket.on('player_respawned', () => {
+            gameOverElement.classList.remove('show');
+        });
+
+        // Controls
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            
+            if (e.key === ' ' || e.key.toLowerCase() === 'space') {
+                socket.emit('player_attack');
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Send movement to server
+        setInterval(() => {
+            if (!myPlayerId) return;
+            
+            let dx = 0;
+            let dy = 0;
+            
+            if (keys['w'] || keys['arrowup']) dy = -1;
+            if (keys['s'] || keys['arrowdown']) dy = 1;
+            if (keys['a'] || keys['arrowleft']) dx = -1;
+            if (keys['d'] || keys['arrowright']) dx = 1;
+            
+            if (dx !== 0 || dy !== 0) {
+                socket.emit('player_move', { dx, dy });
+            }
+        }, 50);
+
+        function updateUI() {
+            const myPlayer = players[myPlayerId];
+            if (myPlayer) {
+                playerHPElement.textContent = myPlayer.hp;
+                
+                // Show game over if I died
+                if (!myPlayer.alive && !gameOverElement.classList.contains('show')) {
+                    winnerText.textContent = '💀 YOU DIED! 💀';
+                    gameOverElement.classList.add('show');
+                }
+            }
+            
+            const alivePlayers = Object.values(players).filter(p => p.alive).length;
+            playersAliveElement.textContent = alivePlayers;
+            
+            // Update players list
+            playersListContent.innerHTML = Object.values(players)
+                .map(p => `
+                    <div class="player-item ${p.alive ? '' : 'eliminated'}">
+                        <span>${p.name} ${p.id === myPlayerId ? '(You)' : ''}</span>
+                        <span>HP: ${p.hp}</span>
+                    </div>
+                `).join('');
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw platform
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(100, 100, 700, 400);
+            
+            // Draw platform border (safe zone)
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(100, 100, 700, 400);
+            
+            // Draw danger zones (red)
+            ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
+            ctx.fillRect(0, 0, 100, canvas.height); // Left
+            ctx.fillRect(800, 0, 100, canvas.height); // Right
+            ctx.fillRect(0, 0, canvas.width, 100); // Top
+            ctx.fillRect(0, 500, canvas.width, 100); // Bottom
+            
+            // Draw all players
+            Object.values(players).forEach(player => {
+                if (!player.alive) return;
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.beginPath();
+                ctx.ellipse(player.x, player.y + 35, 25, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Player body
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x - 20, player.y - 20, 40, 50);
+                
+                // Head
+                ctx.fillStyle = '#FFE0BD';
+                ctx.beginPath();
+                ctx.arc(player.x, player.y - 30, 15, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eyes
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(player.x - 5, player.y - 32, 2, 0, Math.PI * 2);
+                ctx.arc(player.x + 5, player.y - 32, 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Crown (for self)
+                if (player.id === myPlayerId) {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.font = '20px Arial';
+                    ctx.fillText('👑', player.x - 10, player.y - 45);
+                }
+                
+                // Attack animation
+                if (player.attacking) {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(player.x, player.y, 50, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Name tag
+                ctx.fillStyle = '#fff';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.strokeText(player.name, player.x, player.y - 50);
+                ctx.fillText(player.name, player.x, player.y - 50);
+                
+                // HP bar
+                const hpBarWidth = 40;
+                const hpWidth = (player.hp / 100) * hpBarWidth;
+                ctx.fillStyle = '#333';
+                ctx.fillRect(player.x - hpBarWidth/2, player.y + 35, hpBarWidth, 5);
+                ctx.fillStyle = player.hp > 50 ? '#4CAF50' : player.hp > 25 ? '#FFA500' : '#f44336';
+                ctx.fillRect(player.x - hpBarWidth/2, player.y + 35, hpWidth, 5);
+            });
+        }
+
+        function joinGame() {
+            const name = playerNameInput.value.trim();
+            if (name === '') {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            myPlayerName = name;
+            playerNameElement.textContent = myPlayerName;
+            nameModal.classList.add('hidden');
+            
+            // Join the game
+            socket.emit('join_game', { name: myPlayerName });
+        }
+
+        function respawn() {
+            socket.emit('respawn_player');
+            gameOverElement.classList.remove('show');
+        }
+
+        startBtn.addEventListener('click', joinGame);
+        respawnBtn.addEventListener('click', respawn);
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinGame();
+            }
+        });
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>

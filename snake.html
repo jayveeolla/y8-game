@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game - Mouse Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px;
+        }
+
+        .game-wrapper {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        h1 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            gap: 30px;
+        }
+
+        .score {
+            font-size: 1.3em;
+            color: #2a5298;
+            font-weight: bold;
+        }
+
+        canvas {
+            border: 3px solid #1e3c72;
+            border-radius: 10px;
+            background: #f0f8ff;
+            cursor: none;
+            display: block;
+            position: relative;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .controls {
+            margin-top: 15px;
+            color: #555;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .restart-btn:active {
+            transform: scale(0.95);
+        }
+
+        .game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 60, 114, 0.95);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 2em;
+            z-index: 10;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .instructions {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .control-mode {
+            display: inline-block;
+            padding: 5px 15px;
+            margin: 5px;
+            background: #e8f4f8;
+            border-radius: 15px;
+            font-size: 0.85em;
+        }
+
+        .name-input-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .name-input-modal.hidden {
+            display: none !important;
+        }
+
+        .name-input-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .name-input-box h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+        }
+
+        .name-input-box input {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            border: 2px solid #1e3c72;
+            border-radius: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+
+        .name-input-box button {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .name-input-box button:hover {
+            transform: scale(1.05);
+        }
+
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 300px;
+            max-height: 680px;
+            overflow-y: auto;
+        }
+
+        .leaderboard h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid #1e3c72;
+        }
+
+        .leaderboard-item.current-player {
+            background: #fff9c4;
+            border-left-color: #ff9800;
+        }
+
+        .leaderboard-rank {
+            font-weight: bold;
+            color: #1e3c72;
+            margin-right: 10px;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            text-align: left;
+        }
+
+        .leaderboard-score {
+            font-weight: bold;
+            color: #2a5298;
+        }
+    </style>
+</head>
+<body>
+    <!-- Name Input Modal -->
+    <div class="name-input-modal" id="nameModal">
+        <div class="name-input-box">
+            <h2>🐍 Enter Your Name</h2>
+            <input type="text" id="playerNameInput" placeholder="Your Name" maxlength="20" autofocus />
+            <br>
+            <button id="startBtn">Start Playing!</button>
+        </div>
+    </div>
+
+    <div class="game-wrapper">
+        <div class="game-container">
+            <h1>🐍 Snake Game</h1>
+            <div class="score-board">
+                <div class="score">Player: <span id="playerName">Guest</span></div>
+                <div class="score">Score: <span id="score">0</span></div>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas" width="600" height="600"></canvas>
+                
+                <div class="game-over" id="gameOver">
+                    <div>Game Over!</div>
+                    <div style="font-size: 0.6em; margin-top: 20px;">Click "New Game" to play again</div>
+                </div>
+            </div>
+            <div class="instructions">
+                <div class="control-mode">🖱️ Move mouse to control</div>
+                <div class="control-mode">⌨️ Use arrow keys ↑ ↓ ← →</div>
+                <div style="margin-top: 5px;">🍎 Eat the red food to grow longer</div>
+            </div>
+            <button class="restart-btn" id="restartBtn">New Game</button>
+        </div>
+        
+        <!-- Leaderboard -->
+        <div class="leaderboard">
+            <h3>🏆 Leaderboard - Top 10</h3>
+            <div id="leaderboardList"></div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const playerNameElement = document.getElementById('playerName');
+        const gameOverElement = document.getElementById('gameOver');
+        const restartBtn = document.getElementById('restartBtn');
+        const nameModal = document.getElementById('nameModal');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const startBtn = document.getElementById('startBtn');
+
+        // Connect to Socket.IO server
+        const socket = io();
+        
+        // Receive leaderboard updates from server
+        socket.on('snake_leaderboard', (leaderboard) => {
+            displayLeaderboard(leaderboard);
+        });
+
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: 15, y: 15 };
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let gameRunning = false;
+        let speed = 8;
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
+        let playerName = '';
+        let useKeyboard = false;
+
+        // Track mouse position
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            useKeyboard = true;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                    if (!(dx === 0 && dy === 1)) {
+                        dx = 0;
+                        dy = -1;
+                    }
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    if (!(dx === 0 && dy === -1)) {
+                        dx = 0;
+                        dy = 1;
+                    }
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                    if (!(dx === 1 && dy === 0)) {
+                        dx = -1;
+                        dy = 0;
+                    }
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    if (!(dx === -1 && dy === 0)) {
+                        dx = 1;
+                        dy = 0;
+                    }
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            updateSnakeDirection();
+            moveSnake();
+            
+            if (checkCollision()) {
+                endGame();
+                return;
+            }
+
+            if (checkFoodCollision()) {
+                score++;
+                scoreElement.textContent = score;
+                
+                generateFood();
+                speed = Math.min(15, 8 + score * 0.2); // Gradually increase speed
+            } else {
+                snake.pop();
+            }
+
+            draw();
+            setTimeout(gameLoop, 1000 / speed);
+        }
+
+        function updateSnakeDirection() {
+            // Skip mouse control if using keyboard
+            if (useKeyboard) {
+                return;
+            }
+
+            const head = snake[0];
+            const headX = head.x * gridSize + gridSize / 2;
+            const headY = head.y * gridSize + gridSize / 2;
+
+            // Calculate direction to mouse
+            const deltaX = mouseX - headX;
+            const deltaY = mouseY - headY;
+
+            // Determine primary direction
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Move horizontally
+                if (deltaX > 5 && !(dx === -1 && dy === 0)) {
+                    dx = 1; dy = 0;
+                } else if (deltaX < -5 && !(dx === 1 && dy === 0)) {
+                    dx = -1; dy = 0;
+                }
+            } else {
+                // Move vertically
+                if (deltaY > 5 && !(dx === 0 && dy === -1)) {
+                    dx = 0; dy = 1;
+                } else if (deltaY < -5 && !(dx === 0 && dy === 1)) {
+                    dx = 0; dy = -1;
+                }
+            }
+        }
+
+        function moveSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+        }
+
+        function checkCollision() {
+            const head = snake[0];
+
+            // Wall collision
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                return true;
+            }
+
+            // Self collision
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        function checkFoodCollision() {
+            return snake[0].x === food.x && snake[0].y === food.y;
+        }
+
+        function generateFood() {
+            let newFood;
+            do {
+                newFood = {
+                    x: Math.floor(Math.random() * tileCount),
+                    y: Math.floor(Math.random() * tileCount)
+                };
+            } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+            
+            food = newFood;
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#f0f8ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid (subtle)
+            ctx.strokeStyle = '#e6f2ff';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= tileCount; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * gridSize, 0);
+                ctx.lineTo(i * gridSize, canvas.height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i * gridSize);
+                ctx.lineTo(canvas.width, i * gridSize);
+                ctx.stroke();
+            }
+
+            // Draw snake
+            snake.forEach((segment, index) => {
+                if (index === 0) {
+                    // Head - gradient
+                    const gradient = ctx.createRadialGradient(
+                        segment.x * gridSize + gridSize / 2,
+                        segment.y * gridSize + gridSize / 2,
+                        0,
+                        segment.x * gridSize + gridSize / 2,
+                        segment.y * gridSize + gridSize / 2,
+                        gridSize
+                    );
+                    gradient.addColorStop(0, '#2ecc71');
+                    gradient.addColorStop(1, '#27ae60');
+                    ctx.fillStyle = gradient;
+                } else {
+                    // Body - gets darker towards tail
+                    const opacity = 1 - (index / snake.length) * 0.3;
+                    ctx.fillStyle = `rgba(46, 204, 113, ${opacity})`;
+                }
+                
+                ctx.fillRect(
+                    segment.x * gridSize + 1,
+                    segment.y * gridSize + 1,
+                    gridSize - 2,
+                    gridSize - 2
+                );
+                
+                // Add shine effect on head
+                if (index === 0) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.fillRect(
+                        segment.x * gridSize + 3,
+                        segment.y * gridSize + 3,
+                        gridSize / 3,
+                        gridSize / 3
+                    );
+                }
+            });
+
+            // Draw food (apple-like)
+            const gradient = ctx.createRadialGradient(
+                food.x * gridSize + gridSize / 2,
+                food.y * gridSize + gridSize / 2,
+                0,
+                food.x * gridSize + gridSize / 2,
+                food.y * gridSize + gridSize / 2,
+                gridSize / 2
+            );
+            gradient.addColorStop(0, '#ff6b6b');
+            gradient.addColorStop(1, '#ee5a6f');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(
+                food.x * gridSize + gridSize / 2,
+                food.y * gridSize + gridSize / 2,
+                gridSize / 2 - 2,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+
+            // Draw mouse cursor indicator
+            ctx.fillStyle = 'rgba(30, 60, 114, 0.3)';
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function endGame() {
+            gameRunning = false;
+            saveHighScore();
+            gameOverElement.classList.add('show');
+        }
+
+        function saveHighScore() {
+            // Send score to server
+            socket.emit('snake_score', {
+                name: playerName,
+                score: score
+            });
+        }
+
+        function displayLeaderboard(highScores) {
+            if (!highScores || highScores.length === 0) {
+                leaderboardList.innerHTML = '<div style="color: #999;">No scores yet. Be the first!</div>';
+                return;
+            }
+            
+            leaderboardList.innerHTML = highScores.map((entry, index) => {
+                const isCurrentPlayer = entry.name === playerName;
+                return `
+                    <div class="leaderboard-item ${isCurrentPlayer ? 'current-player' : ''}">
+                        <span class="leaderboard-rank">#${index + 1}</span>
+                        <span class="leaderboard-name">${entry.name}</span>
+                        <span class="leaderboard-score">${entry.score} pts</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function startGameWithName() {
+            console.log('startGameWithName called');
+            const name = playerNameInput.value.trim();
+            console.log('Name entered:', name);
+            
+            if (name === '') {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            playerName = name;
+            playerNameElement.textContent = playerName;
+            
+            // Save name to localStorage
+            localStorage.setItem('snakePlayerName', playerName);
+            
+            console.log('Hiding modal...');
+            nameModal.classList.add('hidden');
+            console.log('Modal hidden, starting game...');
+            gameRunning = true;
+            generateFood();
+            gameLoop();
+            console.log('Game started!');
+        }
+
+        function restartGame() {
+            snake = [{ x: 10, y: 10 }];
+            dx = 0;
+            dy = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            speed = 8;
+            gameRunning = true;
+            useKeyboard = false;
+            gameOverElement.classList.remove('show');
+            generateFood();
+            gameLoop();
+        }
+
+        restartBtn.addEventListener('click', restartGame);
+
+        // Name input handlers
+        console.log('startBtn element:', startBtn);
+        console.log('playerNameInput element:', playerNameInput);
+        
+        if (startBtn) {
+            console.log('Adding click listener to startBtn');
+            startBtn.addEventListener('click', function() {
+                console.log('Start button clicked!');
+                startGameWithName();
+            });
+        } else {
+            console.error('startBtn not found!');
+        }
+        
+        if (playerNameInput) {
+            playerNameInput.addEventListener('keypress', (e) => {
+                console.log('Key pressed:', e.key);
+                if (e.key === 'Enter') {
+                    startGameWithName();
+                }
+            });
+        }
+
+        // Show name modal on page load or auto-start if name is saved
+        const savedName = localStorage.getItem('snakePlayerName');
+        if (savedName) {
+            playerName = savedName;
+            playerNameElement.textContent = playerName;
+            nameModal.classList.add('hidden');
+            gameRunning = true;
+            generateFood();
+            gameLoop();
+        }
+    </script>
+</body>
+</html>
