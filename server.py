@@ -20,6 +20,20 @@ game_state = {
 # Snake game leaderboard
 snake_leaderboard = []
 
+# Tetris Battle rooms
+tetris_rooms = {}
+import random
+import string
+
+def generate_room_code():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+# Color Game state (Perya style betting game)
+color_game_players = {}
+color_game_grid = {}  # Changed to dict to store bet amounts per color
+color_game_colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#ff6b6b', '#4ecdc4', '#95e1d3']
+color_game_color_index = 0
+
 # Royal Rumble game state
 rumble_players = {}
 rumble_colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e']
@@ -167,6 +181,11 @@ def fight():
 def rumble():
     return send_from_directory('.', 'rumble.html')
 
+@app.route('/colorgame.html')
+@app.route('/gamehub/colorgame.html')
+def colorgame():
+    return send_from_directory('.', 'colorgame.html')
+
 @app.route('/tank.html')
 @app.route('/gamehub/tank.html')
 def tank():
@@ -176,6 +195,21 @@ def tank():
 @app.route('/gamehub/racing.html')
 def racing():
     return send_from_directory('.', 'racing.html')
+
+@app.route('/tetris.html')
+@app.route('/gamehub/tetris.html')
+def tetris():
+    return send_from_directory('.', 'tetris.html')
+
+@app.route('/tetris_battle.html')
+@app.route('/gamehub/tetris_battle.html')
+def tetris_battle():
+    return send_from_directory('.', 'tetris_battle.html')
+
+@app.route('/combat.html')
+@app.route('/gamehub/combat.html')
+def combat():
+    return send_from_directory('.', 'combat.html')
 
 @socketio.on('connect')
 def handle_connect():
@@ -1025,6 +1059,218 @@ def racing_game_loop():
 # Start racing game loop
 racing_thread = threading.Thread(target=racing_game_loop, daemon=True)
 racing_thread.start()
+
+# Color Game Socket.IO handlers
+@socketio.on('join_color_game')
+def handle_join_color_game(data):
+    player_id = request.sid
+    
+    color_game_players[player_id] = {
+        'id': player_id,
+        'name': data['name'],
+        'coins': 100,
+        'currentBet': None
+    }
+    
+    emit('player_id', player_id)
+    broadcast_color_game_state()
+
+@socketio.on('place_bet')
+def handle_place_bet(data):
+    player_id = request.sid
+    if player_id not in color_game_players:
+        return
+    
+    player = color_game_players[player_id]
+    color = data['color']
+    amount = data['amount']
+    
+    # Check if player has enough coins
+    if amount > player['coins']:
+        emit('error', {'message': 'Not enough coins!'})
+        return
+    
+    # Deduct coins
+    player['coins'] -= amount
+    player['currentBet'] = {'color': color, 'amount': amount}
+    
+    # Add to total bets for this color
+    if color not in color_game_grid:
+        color_game_grid[color] = 0
+    color_game_grid[color] += amount
+    
+    broadcast_color_game_state()
+
+@socketio.on('roll_dice')
+def handle_roll_dice():
+    import random
+    
+    # Mark as rolling
+    color_game_players['rolling'] = True
+    broadcast_color_game_state()
+    
+    # Roll 3 dice - each can be any of the 6 colors
+    colors = ['red', 'blue', 'yellow', 'green', 'pink', 'white']
+    result = [random.choice(colors) for _ in range(3)]
+    
+    # Count which colors won
+    color_counts = {}
+    for color in result:
+        color_counts[color] = color_counts.get(color, 0) + 1
+    
+    # Find winning players and calculate payouts
+    winners = []
+    win_amounts = {}
+    
+    for player_id, player in color_game_players.items():
+        if player_id == 'rolling':
+            continue
+            
+        if not player.get('currentBet'):
+            continue
+        
+        bet_color = player['currentBet']['color']
+        bet_amount = player['currentBet']['amount']
+        
+        # Check if this color won
+        if bet_color in color_counts:
+            multiplier = color_counts[bet_color]  # 1x for 1 match, 2x for 2 matches, 3x for 3 matches
+            winnings = bet_amount * (multiplier + 1)  # Get back bet + winnings
+            player['coins'] += winnings
+            winners.append(player_id)
+            win_amounts[player_id] = winnings
+        
+        # Clear current bet
+        player['currentBet'] = None
+    
+    # Clear grid bets
+    color_game_grid.clear()
+    
+    # Unmark rolling
+    del color_game_players['rolling']
+    
+    # Broadcast result
+    with app.app_context():
+        socketio.emit('dice_rolled', {
+            'colors': result,
+            'winners': winners,
+            'winAmount': win_amounts
+        })
+    
+    broadcast_color_game_state()
+
+@socketio.on('disconnect')
+def handle_color_game_disconnect():
+    player_id = request.sid
+    if player_id in color_game_players:
+        del color_game_players[player_id]
+        broadcast_color_game_state()
+
+def broadcast_color_game_state():
+    with app.app_context():
+        socketio.emit('color_game_state', {
+            'players': color_game_players,
+            'bets': color_game_grid,
+            'rolling': 'rolling' in color_game_players
+        })
+
+# Tetris Battle Socket Events
+@socketio.on('create_tetris_room')
+def handle_create_tetris_room(data):
+    room_code = generate_room_code()
+    player_id = request.sid
+    
+    tetris_rooms[room_code] = {
+        'players': {
+            player_id: {
+                'name': data['playerName'],
+                'ready': False
+            }
+        },
+        'started': False
+    }
+    
+    emit('room_created', {'roomCode': room_code, 'playerId': player_id})
+
+@socketio.on('join_tetris_room')
+def handle_join_tetris_room(data):
+    room_code = data['roomCode']
+    player_id = request.sid
+    
+    if room_code not in tetris_rooms:
+        emit('room_not_found')
+        return
+    
+    room = tetris_rooms[room_code]
+    
+    if len(room['players']) >= 2:
+        emit('room_full')
+        return
+    
+    room['players'][player_id] = {
+        'name': data['playerName'],
+        'ready': False
+    }
+    
+    emit('room_joined', {'roomCode': room_code, 'playerId': player_id})
+    
+    # Start game when 2 players joined
+    if len(room['players']) == 2:
+        room['started'] = True
+        player_ids = list(room['players'].keys())
+        
+        # Notify both players
+        socketio.emit('start_tetris_game', {
+            'opponentName': room['players'][player_ids[1]]['name']
+        }, room=player_ids[0])
+        
+        socketio.emit('start_tetris_game', {
+            'opponentName': room['players'][player_ids[0]]['name']
+        }, room=player_ids[1])
+
+@socketio.on('tetris_update')
+def handle_tetris_update(data):
+    room_code = data['roomCode']
+    player_id = request.sid
+    
+    if room_code not in tetris_rooms:
+        return
+    
+    room = tetris_rooms[room_code]
+    
+    # Send update to opponent
+    for pid in room['players']:
+        if pid != player_id:
+            socketio.emit('opponent_update', {
+                'board': data['board'],
+                'currentPiece': data['currentPiece'],
+                'score': data['score'],
+                'lines': data['lines'],
+                'level': data['level']
+            }, room=pid)
+
+@socketio.on('tetris_game_over')
+def handle_tetris_game_over(data):
+    room_code = data['roomCode']
+    player_id = request.sid
+    
+    if room_code not in tetris_rooms:
+        return
+    
+    room = tetris_rooms[room_code]
+    
+    # Notify opponent they won
+    for pid in room['players']:
+        if pid != player_id:
+            socketio.emit('opponent_game_over', {}, room=pid)
+    
+    # Clean up room after a delay
+    def cleanup_room():
+        time.sleep(5)
+        if room_code in tetris_rooms:
+            del tetris_rooms[room_code]
+    
+    threading.Thread(target=cleanup_room).start()
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=8070, debug=True, allow_unsafe_werkzeug=True)

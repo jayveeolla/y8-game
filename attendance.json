@@ -1,0 +1,893 @@
+[
+    {
+        "emp_id": "0000",
+        "name": "00",
+        "date": "2026-02-02",
+        "time": "08:19:54",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:19:54.609198",
+        "confidence": 0.9208386418671515
+    },
+    {
+        "emp_id": "0000",
+        "name": "00",
+        "date": "2026-02-02",
+        "time": "08:22:11",
+        "type": "OUT",
+        "timestamp": "2026-02-02T08:22:11.804778",
+        "confidence": 0.7368747572031167
+    },
+    {
+        "emp_id": "asdas",
+        "name": "asda",
+        "date": "2026-02-02",
+        "time": "08:23:06",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:23:06.242749",
+        "confidence": 0.9399969558231872
+    },
+    {
+        "emp_id": "0000",
+        "name": "00",
+        "date": "2026-02-02",
+        "time": "08:25:45",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:25:45.760213",
+        "confidence": 0.9137804870888492
+    },
+    {
+        "emp_id": "asdas",
+        "name": "asda",
+        "date": "2026-02-02",
+        "time": "08:25:57",
+        "type": "OUT",
+        "timestamp": "2026-02-02T08:25:57.673060",
+        "confidence": 0.9192811647926591
+    },
+    {
+        "emp_id": "asdas",
+        "name": "asda",
+        "date": "2026-02-02",
+        "time": "08:26:40",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:26:40.592769",
+        "confidence": 0.9194000140300898
+    },
+    {
+        "emp_id": "asdas",
+        "name": "asda",
+        "date": "2026-02-02",
+        "time": "08:27:25",
+        "type": "OUT",
+        "timestamp": "2026-02-02T08:27:25.076688",
+        "confidence": 0.7625075278671765
+    },
+    {
+        "emp_id": "01029227",
+        "name": "Daisuke Hamo",
+        "date": "2026-02-02",
+        "time": "08:28:03",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:28:03.329035",
+        "confidence": 0.904550414465792
+    },
+    {
+        "emp_id": "01029227",
+        "name": "Daisuke Hamo",
+        "date": "2026-02-02",
+        "time": "08:28:15",
+        "type": "OUT",
+        "timestamp": "2026-02-02T08:28:15.059289",
+        "confidence": 0.8695846687779573
+    },
+    {
+        "emp_id": "01029227",
+        "name": "Daisuke Hamo",
+        "date": "2026-02-02",
+        "time": "08:28:20",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:28:20.862051",
+        "confidence": 0.8572117826427196
+    },
+    {
+        "emp_id": "01029227",
+        "name": "Daisuke Hamo",
+        "date": "2026-02-02",
+        "time": "08:28:30",
+        "type": "OUT",
+        "timestamp": "2026-02-02T08:28:30.106069",
+        "confidence": 0.8149557064352109
+    },
+    {
+        "emp_id": "0102222",
+        "name": "sadsadsa",
+        "date": "2026-02-02",
+        "time": "08:28:56",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:28:56.975422",
+        "confidence": 0.9437313387240475
+    },
+    {
+        "emp_id": "01029227",
+        "name": "Daisuke Hamo",
+        "date": "2026-02-02",
+        "time": "08:29:12",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:29:12.406160",
+        "confidence": 0.7692656205484327
+    },
+    {
+        "emp_id": "asdas",
+        "name": "asda",
+        "date": "2026-02-02",
+        "time": "08:29:35",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:29:35.721877",
+        "confidence": 0.8774866030172581
+    },
+    {
+        "emp_id": "0102222",
+        "name": "sadsadsa",
+        "date": "2026-02-02",
+        "time": "08:35:14",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:35:14.185655",
+        "confidence": 0.740782327128181
+    },
+    {
+        "emp_id": "01022345",
+        "name": "Ivan Constante",
+        "date": "2026-02-02",
+        "time": "08:39:57",
+        "type": "OUT",
+        "timestamp": "2026-02-02T08:39:57.443864",
+        "confidence": 0.9269366722412231
+    },
+    {
+        "emp_id": "01022345",
+        "name": "Ivan Constante",
+        "date": "2026-02-02",
+        "time": "08:40:02",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:40:02.769437",
+        "confidence": 0.9337349648889733
+    },
+    {
+        "emp_id": "01028771",
+        "name": "Reimarc Corpuz",
+        "date": "2026-02-02",
+        "time": "08:57:15",
+        "type": "IN",
+        "timestamp": "2026-02-02T08:57:15.291051",
+        "confidence": 0.9046917084817202
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:18:44",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:18:44.472507",
+        "confidence": 0.9476668671413963
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:18:51",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:18:51.688771",
+        "confidence": 0.927094743984144
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:18:56",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:18:56.339354",
+        "confidence": 0.8055343371337587
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:19:05",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:19:05.473032",
+        "confidence": 0.7720133153914918
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:19:17",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:19:17.074111",
+        "confidence": 0.9528492879762414
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:20:28",
+        "type": "OUT",
+        "timestamp": "2026-02-02T09:20:28.598754",
+        "confidence": 0.8886022051161362
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:20:37",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:20:37.622757",
+        "confidence": 0.8669976626829349
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:20:44",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:20:44.316208",
+        "confidence": 0.8750762106291071
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:21:43",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:21:43.440789",
+        "confidence": 0.8481226863742583
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:21:52",
+        "type": "OUT",
+        "timestamp": "2026-02-02T09:21:52.041290",
+        "confidence": 0.9043557432209197
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:36:04",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:36:04.427244",
+        "confidence": 0.9660697779166214
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:36:13",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:36:13.509297",
+        "confidence": 0.8682207225170683
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:36:17",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:36:17.508211",
+        "confidence": 0.8770942625562929
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-02",
+        "time": "09:36:33",
+        "type": "IN",
+        "timestamp": "2026-02-02T09:36:33.462115",
+        "confidence": 0.9389154943461793
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:10:31",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:10:31.650872",
+        "confidence": 0.946391885179487
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:10:41",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:10:41.022330",
+        "confidence": 0.9470273405657192
+    },
+    {
+        "emp_id": "01026212",
+        "name": "Jander Ramirez",
+        "date": "2026-02-03",
+        "time": "11:11:07",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:11:07.997994",
+        "confidence": 0.9300870438197463
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-03",
+        "time": "11:11:13",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:11:13.605809",
+        "confidence": 0.9247167805785734
+    },
+    {
+        "emp_id": "01026212",
+        "name": "Jander Ramirez",
+        "date": "2026-02-03",
+        "time": "11:11:19",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:11:19.864691",
+        "confidence": 0.9334578845534941
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:11:23",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:11:23.454611",
+        "confidence": 0.9292227453934092
+    },
+    {
+        "emp_id": "01026212",
+        "name": "Jander Ramirez",
+        "date": "2026-02-03",
+        "time": "11:11:30",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:11:30.116278",
+        "confidence": 0.7909939394936216
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:11:42",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:11:42.855365",
+        "confidence": 0.9235782411313033
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:11:54",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:11:54.459740",
+        "confidence": 0.9084615673100636
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:12:00",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:12:00.702654",
+        "confidence": 0.8962619755517185
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:12:18",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:12:18.502782",
+        "confidence": 0.9087341799266229
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:12:26",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:12:26.947849",
+        "confidence": 0.9229409139230379
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:12:33",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:12:33.360538",
+        "confidence": 0.9098525673065181
+    },
+    {
+        "emp_id": "01026212",
+        "name": "Jander Ramirez",
+        "date": "2026-02-03",
+        "time": "11:12:36",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:12:36.828032",
+        "confidence": 0.9325371203698924
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:12:56",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:12:56.781987",
+        "confidence": 0.9518971372535
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:13:04",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:13:04.215056",
+        "confidence": 0.9281418820318283
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:13:27",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:13:27.243217",
+        "confidence": 0.9273714896249998
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:15:39",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:15:39.286275",
+        "confidence": 0.8946112828903586
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:15:43",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:15:43.898902",
+        "confidence": 0.9056160822737449
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:15:47",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:15:47.886543",
+        "confidence": 0.9168563218350131
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:17:58",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:17:58.020122",
+        "confidence": 0.9250885734895518
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:18:01",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:18:01.079993",
+        "confidence": 0.9409909274256472
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:18:04",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:18:04.534283",
+        "confidence": 0.9403628379119788
+    },
+    {
+        "emp_id": "01028223",
+        "name": "Gener Almario",
+        "date": "2026-02-03",
+        "time": "11:18:08",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:18:08.042594",
+        "confidence": 0.9323342071687577
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-03",
+        "time": "11:41:09",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:41:09.408980",
+        "confidence": 67.0
+    },
+    {
+        "emp_id": "01026212",
+        "name": "Jander Ramirez",
+        "date": "2026-02-03",
+        "time": "11:42:07",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:42:07.499359",
+        "confidence": 72.0
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-03",
+        "time": "11:42:51",
+        "type": "OUT",
+        "timestamp": "2026-02-03T11:42:51.104753",
+        "confidence": 84.0
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-03",
+        "time": "11:42:59",
+        "type": "OUT",
+        "timestamp": "2026-02-03T11:42:59.893126",
+        "confidence": 65.0
+    },
+    {
+        "emp_id": "01026212",
+        "name": "Jander Ramirez",
+        "date": "2026-02-03",
+        "time": "11:43:09",
+        "type": "OUT",
+        "timestamp": "2026-02-03T11:43:09.868438",
+        "confidence": 61.0
+    },
+    {
+        "emp_id": "0102222",
+        "name": "sadsadsa",
+        "date": "2026-02-03",
+        "time": "11:46:20",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:46:20.230561",
+        "confidence": 69.0
+    },
+    {
+        "emp_id": "01028771",
+        "name": "Reimarc Corpuz",
+        "date": "2026-02-03",
+        "time": "11:46:35",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:46:35.501753",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-03",
+        "time": "11:46:45",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:46:45.864029",
+        "confidence": 70.0
+    },
+    {
+        "emp_id": "01028771",
+        "name": "Reimarc Corpuz",
+        "date": "2026-02-03",
+        "time": "11:47:08",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:47:08.730811",
+        "confidence": 61.0
+    },
+    {
+        "emp_id": "01028771",
+        "name": "Reimarc Corpuz",
+        "date": "2026-02-03",
+        "time": "11:50:04",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:50:04.632032",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "0102222",
+        "name": "sadsadsa",
+        "date": "2026-02-03",
+        "time": "11:53:10",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:53:10.954963",
+        "confidence": 61.0
+    },
+    {
+        "emp_id": "0102222",
+        "name": "sadsadsa",
+        "date": "2026-02-03",
+        "time": "11:53:24",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:53:24.202921",
+        "confidence": 67.0
+    },
+    {
+        "emp_id": "0102222",
+        "name": "sadsadsa",
+        "date": "2026-02-03",
+        "time": "11:54:04",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:54:04.731670",
+        "confidence": 62.0
+    },
+    {
+        "emp_id": "01029271",
+        "name": "Paul Marbella",
+        "date": "2026-02-03",
+        "time": "11:57:18",
+        "type": "IN",
+        "timestamp": "2026-02-03T11:57:18.024213",
+        "confidence": 69.0
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-03",
+        "time": "12:00:06",
+        "type": "IN",
+        "timestamp": "2026-02-03T12:00:06.674043",
+        "confidence": 69.0
+    },
+    {
+        "emp_id": "01029271",
+        "name": "Paul Marbella",
+        "date": "2026-02-03",
+        "time": "12:00:26",
+        "type": "IN",
+        "timestamp": "2026-02-03T12:00:26.796284",
+        "confidence": 62.0
+    },
+    {
+        "emp_id": "000002",
+        "name": "wqewq",
+        "date": "2026-02-03",
+        "time": "12:02:11",
+        "type": "IN",
+        "timestamp": "2026-02-03T12:02:11.355465",
+        "confidence": 70.0
+    },
+    {
+        "emp_id": "000002",
+        "name": "wqewq",
+        "date": "2026-02-03",
+        "time": "12:02:19",
+        "type": "IN",
+        "timestamp": "2026-02-03T12:02:19.084163",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "01026743",
+        "name": "Jander Ramirez",
+        "date": "2026-02-03",
+        "time": "12:45:38",
+        "type": "IN",
+        "timestamp": "2026-02-03T12:45:38.192888",
+        "confidence": 65.0
+    },
+    {
+        "emp_id": "01029237",
+        "name": "France Delos Reyes",
+        "date": "2026-02-03",
+        "time": "12:50:51",
+        "type": "IN",
+        "timestamp": "2026-02-03T12:50:51.134300",
+        "confidence": 69.0
+    },
+    {
+        "emp_id": "01028768",
+        "name": "Ronnie Realco",
+        "date": "2026-02-03",
+        "time": "12:53:06",
+        "type": "IN",
+        "timestamp": "2026-02-03T12:53:06.992472",
+        "confidence": 62.0
+    },
+    {
+        "emp_id": "01029271",
+        "name": "Paul Marbella",
+        "date": "2026-02-03",
+        "time": "13:06:15",
+        "type": "OUT",
+        "timestamp": "2026-02-03T13:06:15.529853",
+        "confidence": 70.0
+    },
+    {
+        "emp_id": "01026743",
+        "name": "Jander Ramirez",
+        "date": "2026-02-03",
+        "time": "13:14:10",
+        "type": "OUT",
+        "timestamp": "2026-02-03T13:14:10.042294",
+        "confidence": 61.0
+    },
+    {
+        "emp_id": "01022345",
+        "name": "Ivan Constante",
+        "date": "2026-02-03",
+        "time": "13:15:31",
+        "type": "IN",
+        "timestamp": "2026-02-03T13:15:31.067540",
+        "confidence": 62.0
+    },
+    {
+        "emp_id": "01022345",
+        "name": "Ivan Constante",
+        "date": "2026-02-03",
+        "time": "13:15:44",
+        "type": "OUT",
+        "timestamp": "2026-02-03T13:15:44.131742",
+        "confidence": 65.0
+    },
+    {
+        "emp_id": "01029302",
+        "name": "John Gabriel Caravana",
+        "date": "2026-02-03",
+        "time": "13:47:39",
+        "type": "IN",
+        "timestamp": "2026-02-03T13:47:39.010694",
+        "confidence": 71.0
+    },
+    {
+        "emp_id": "01029302",
+        "name": "John Gabriel Caravana",
+        "date": "2026-02-03",
+        "time": "13:47:48",
+        "type": "OUT",
+        "timestamp": "2026-02-03T13:47:48.062060",
+        "confidence": 62.0
+    },
+    {
+        "emp_id": "01029306",
+        "name": "Van Mattew Mapiscay",
+        "date": "2026-02-03",
+        "time": "15:22:50",
+        "type": "IN",
+        "timestamp": "2026-02-03T15:22:50.620914",
+        "confidence": 61.0
+    },
+    {
+        "emp_id": "01029306",
+        "name": "Van Mattew Mapiscay",
+        "date": "2026-02-03",
+        "time": "15:22:59",
+        "type": "OUT",
+        "timestamp": "2026-02-03T15:22:59.599306",
+        "confidence": 62.0
+    },
+    {
+        "emp_id": "01028530",
+        "name": "Amiel Guinto",
+        "date": "2026-02-03",
+        "time": "15:27:59",
+        "type": "IN",
+        "timestamp": "2026-02-03T15:27:59.686666",
+        "confidence": 61.0
+    },
+    {
+        "emp_id": "01028530",
+        "name": "Amiel Guinto",
+        "date": "2026-02-03",
+        "time": "15:28:31",
+        "type": "OUT",
+        "timestamp": "2026-02-03T15:28:31.552114",
+        "confidence": 68.0
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-04",
+        "time": "07:20:28",
+        "type": "IN",
+        "timestamp": "2026-02-04T07:20:28.908946",
+        "confidence": 61.0
+    },
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "date": "2026-02-04",
+        "time": "07:22:25",
+        "type": "OUT",
+        "timestamp": "2026-02-04T07:22:25.650095",
+        "confidence": 63.0
+    },
+    {
+        "emp_id": "01029302",
+        "name": "John Gabriel Caravana",
+        "date": "2026-02-04",
+        "time": "07:24:56",
+        "type": "IN",
+        "timestamp": "2026-02-04T07:24:56.763731",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "01029237",
+        "name": "France Delos Reyes",
+        "date": "2026-02-04",
+        "time": "07:37:55",
+        "type": "IN",
+        "timestamp": "2026-02-04T07:37:55.907578",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "01029302",
+        "name": "John Gabriel Caravana",
+        "date": "2026-02-04",
+        "time": "07:39:19",
+        "type": "OUT",
+        "timestamp": "2026-02-04T07:39:19.789434",
+        "confidence": 64.0
+    },
+    {
+        "emp_id": "01026743",
+        "name": "Jander Ramirez",
+        "date": "2026-02-04",
+        "time": "07:40:29",
+        "type": "IN",
+        "timestamp": "2026-02-04T07:40:29.163296",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "01026743",
+        "name": "Jander Ramirez",
+        "date": "2026-02-04",
+        "time": "07:40:41",
+        "type": "OUT",
+        "timestamp": "2026-02-04T07:40:41.458323",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "01029306",
+        "name": "Van Mattew Mapiscay",
+        "date": "2026-02-04",
+        "time": "07:44:27",
+        "type": "IN",
+        "timestamp": "2026-02-04T07:44:27.433576",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "01028183",
+        "name": "Edward Vallesteros",
+        "date": "2026-02-04",
+        "time": "07:47:04",
+        "type": "IN",
+        "timestamp": "2026-02-04T07:47:04.176789",
+        "confidence": 60.0
+    },
+    {
+        "emp_id": "01023714",
+        "name": "Romulus Dacara",
+        "date": "2026-02-04",
+        "time": "08:27:41",
+        "type": "IN",
+        "timestamp": "2026-02-04T08:27:41.904282",
+        "confidence": 61.0
+    },
+    {
+        "emp_id": "01234567",
+        "name": "Sir Ian",
+        "date": "2026-02-04",
+        "time": "08:29:28",
+        "type": "IN",
+        "timestamp": "2026-02-04T08:29:28.657950",
+        "confidence": 64.0
+    },
+    {
+        "emp_id": "01234567",
+        "name": "Sir Ian",
+        "date": "2026-02-04",
+        "time": "08:29:35",
+        "type": "OUT",
+        "timestamp": "2026-02-04T08:29:35.647063",
+        "confidence": 69.0
+    }
+]

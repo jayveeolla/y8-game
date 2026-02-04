@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Game - Multiplayer</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px);
+        }
+
+        .game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+        }
+
+        h1 {
+            color: #d4af37;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .player-info {
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            padding: 15px 25px;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.3em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .color-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 15px;
+        }
+
+        .color-box {
+            width: 150px;
+            height: 150px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            border: 5px solid transparent;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .color-box:hover {
+            transform: scale(1.1);
+            border-color: #FFD700;
+        }
+
+        .color-box.selected {
+            border-color: #FFD700;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+        }
+
+        .bet-amount {
+            font-size: 0.8em;
+            margin-top: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+
+        .betting-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .bet-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .bet-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .bet-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .bet-input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .dice-container {
+            margin: 30px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .dice-title {
+            color: white;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .dice-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: roll 0.5s ease;
+        }
+
+        @keyframes roll {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+        }
+
+        .players-list {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .players-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 15px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 8px;
+            border-left: 5px solid #667eea;
+        }
+
+        .status {
+            color: #666;
+            font-size: 1.1em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .name-input-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .name-input-modal.hidden {
+            display: none;
+        }
+
+        .name-input-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .name-input-box h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .name-input-box input {
+            padding: 12px 20px;
+            font-size: 1.2em;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+
+        .name-input-box button {
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        .win-announcement {
+            font-size: 2em;
+            color: #FFD700;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Name Input Modal -->
+    <div class="name-input-modal" id="nameModal">
+        <div class="name-input-box">
+            <h2>🎲 COLOR GAME</h2>
+            <p style="color: #666; margin-bottom: 15px;">Pustahan na! Enter your name:</p>
+            <input type="text" id="playerNameInput" placeholder="Your Name" maxlength="20" autofocus />
+            <br>
+            <button id="startBtn">JOIN GAME!</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <h1>🎲 COLOR GAME 🎲</h1>
+        <p class="subtitle">Pustahan na! Choose your color and bet!</p>
+        
+        <div class="info-bar">
+            <div class="player-info">
+                Player: <span id="playerName">-</span>
+            </div>
+            <div class="player-info">
+                Coins: ₱<span id="playerCoins">100</span>
+            </div>
+        </div>
+
+        <div class="status" id="gameStatus">Choose a color and place your bet!</div>
+
+        <div class="color-board">
+            <div class="color-box" data-color="red" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                <span>RED</span>
+                <div class="bet-amount">₱<span id="bet-red">0</span></div>
+            </div>
+            <div class="color-box" data-color="blue" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                <span>BLUE</span>
+                <div class="bet-amount">₱<span id="bet-blue">0</span></div>
+            </div>
+            <div class="color-box" data-color="yellow" style="background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);">
+                <span>YELLOW</span>
+                <div class="bet-amount">₱<span id="bet-yellow">0</span></div>
+            </div>
+            <div class="color-box" data-color="green" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">
+                <span>GREEN</span>
+                <div class="bet-amount">₱<span id="bet-green">0</span></div>
+            </div>
+            <div class="color-box" data-color="pink" style="background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);">
+                <span>PINK</span>
+                <div class="bet-amount">₱<span id="bet-pink">0</span></div>
+            </div>
+            <div class="color-box" data-color="white" style="background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%); color: #333;">
+                <span>WHITE</span>
+                <div class="bet-amount" style="color: white; background: rgba(0,0,0,0.5);">₱<span id="bet-white">0</span></div>
+            </div>
+        </div>
+
+        <div class="betting-controls">
+            <input type="number" id="betAmount" class="bet-input" placeholder="Bet Amount" min="10" value="10">
+            <button class="bet-btn" id="placeBetBtn">PLACE BET</button>
+            <button class="bet-btn" id="rollBtn" style="background: #FF9800;">ROLL DICE!</button>
+        </div>
+
+        <div class="dice-container">
+            <div class="dice-title">🎲 DICE RESULT 🎲</div>
+            <div class="dice-row" id="diceResult">
+                <div class="dice" style="background: #666;">?</div>
+                <div class="dice" style="background: #666;">?</div>
+                <div class="dice" style="background: #666;">?</div>
+            </div>
+        </div>
+
+        <div id="winMessage" class="win-announcement" style="display: none;"></div>
+
+        <div class="players-list">
+            <div class="players-title">👥 Players in Game</div>
+            <div id="playersList"></div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        
+        let myPlayerId = null;
+        let myPlayerName = '';
+        let selectedColor = null;
+        let gameState = {
+            players: {},
+            bets: {},
+            rolling: false,
+            lastResult: []
+        };
+
+        const colorBoxes = document.querySelectorAll('.color-box');
+        const playerNameElement = document.getElementById('playerName');
+        const playerCoinsElement = document.getElementById('playerCoins');
+        const gameStatusElement = document.getElementById('gameStatus');
+        const betAmountInput = document.getElementById('betAmount');
+        const placeBetBtn = document.getElementById('placeBetBtn');
+        const rollBtn = document.getElementById('rollBtn');
+        const diceResult = document.getElementById('diceResult');
+        const winMessage = document.getElementById('winMessage');
+        const playersList = document.getElementById('playersList');
+        const nameModal = document.getElementById('nameModal');
+        const playerNameInput = document.getElementById('playerNameInput');
+        const startBtn = document.getElementById('startBtn');
+
+        const colorMap = {
+            'red': { bg: '#e74c3c', text: 'PULA' },
+            'blue': { bg: '#3498db', text: 'ASUL' },
+            'yellow': { bg: '#f1c40f', text: 'DILAW' },
+            'green': { bg: '#2ecc71', text: 'BERDE' },
+            'pink': { bg: '#e91e63', text: 'ROSAS' },
+            'white': { bg: '#ecf0f1', text: 'PUTI' }
+        };
+
+        socket.on('player_id', (id) => {
+            myPlayerId = id;
+        });
+
+        socket.on('color_game_state', (state) => {
+            gameState = state;
+            updateUI();
+        });
+
+        socket.on('dice_rolled', (result) => {
+            showDiceResult(result);
+        });
+
+        function joinGame() {
+            const name = playerNameInput.value.trim();
+            if (name === '') {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            myPlayerName = name;
+            playerNameElement.textContent = myPlayerName;
+            nameModal.classList.add('hidden');
+            
+            socket.emit('join_color_game', { name: myPlayerName });
+        }
+
+        colorBoxes.forEach(box => {
+            box.addEventListener('click', () => {
+                if (gameState.rolling) return;
+                
+                colorBoxes.forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+                selectedColor = box.dataset.color;
+                gameStatusElement.textContent = `Selected: ${selectedColor.toUpperCase()} - Enter bet amount and click PLACE BET`;
+            });
+        });
+
+        placeBetBtn.addEventListener('click', () => {
+            if (!selectedColor) {
+                alert('Please select a color first!');
+                return;
+            }
+
+            const amount = parseInt(betAmountInput.value);
+            if (isNaN(amount) || amount < 10) {
+                alert('Minimum bet is ₱10!');
+                return;
+            }
+
+            socket.emit('place_bet', { color: selectedColor, amount: amount });
+        });
+
+        rollBtn.addEventListener('click', () => {
+            socket.emit('roll_dice');
+        });
+
+        function updateUI() {
+            if (!myPlayerId || !gameState.players[myPlayerId]) return;
+
+            const myPlayer = gameState.players[myPlayerId];
+            playerCoinsElement.textContent = myPlayer.coins;
+
+            // Update bet displays
+            Object.keys(colorMap).forEach(color => {
+                const betElement = document.getElementById(`bet-${color}`);
+                const totalBets = gameState.bets[color] || 0;
+                betElement.textContent = totalBets;
+            });
+
+            // Update players list
+            playersList.innerHTML = Object.values(gameState.players)
+                .map(player => `
+                    <div class="player-item">
+                        <span>${player.name}</span>
+                        <span>₱${player.coins}</span>
+                    </div>
+                `).join('');
+
+            if (gameState.rolling) {
+                placeBetBtn.disabled = true;
+                rollBtn.disabled = true;
+                gameStatusElement.textContent = '🎲 Rolling dice...';
+            } else {
+                placeBetBtn.disabled = false;
+                rollBtn.disabled = false;
+            }
+        }
+
+        function showDiceResult(result) {
+            diceResult.innerHTML = result.colors.map(color => `
+                <div class="dice" style="background: ${colorMap[color].bg};">${colorMap[color].text}</div>
+            `).join('');
+
+            if (result.winners.includes(myPlayerId)) {
+                winMessage.textContent = `🎉 YOU WIN! +₱${result.winAmount} 🎉`;
+                winMessage.style.display = 'block';
+                setTimeout(() => {
+                    winMessage.style.display = 'none';
+                }, 3000);
+            }
+
+            gameStatusElement.textContent = `Result: ${result.colors.map(c => colorMap[c].text).join(', ')}`;
+        }
+
+        startBtn.addEventListener('click', joinGame);
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinGame();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Attendance System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+        }
+
+        .quick-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .quick-btn {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👤 Simple Attendance</h1>
+            <p>Quick and easy attendance marking</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn">Mark Attendance</a>
+            <a href="/register" class="nav-btn">Register Student</a>
+            <a href="/records" class="nav-btn">View Records</a>
+        </div>
+
+        <div class="card">
+            <div class="info-box">
+                <h3>📋 How to Mark Attendance</h3>
+                <p>Select your name from the dropdown or click on your name button below, then click "Mark Attendance"</p>
+            </div>
+
+            <div class="form-group">
+                <label for="studentSelect">Select Student:</label>
+                <select id="studentSelect">
+                    <option value="">-- Select your name --</option>
+                </select>
+            </div>
+
+            <div class="quick-select" id="quickSelect"></div>
+
+            <button class="btn" onclick="markAttendance()">Mark Attendance</button>
+
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        let students = [];
+
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/registered_students');
+                students = await response.json();
+                
+                const select = document.getElementById('studentSelect');
+                const quickSelect = document.getElementById('quickSelect');
+                
+                select.innerHTML = '<option value="">-- Select your name --</option>';
+                quickSelect.innerHTML = '';
+                
+                students.forEach(student => {
+                    // Add to dropdown
+                    const option = document.createElement('option');
+                    option.value = student;
+                    option.textContent = student;
+                    select.appendChild(option);
+                    
+                    // Add quick button
+                    const btn = document.createElement('button');
+                    btn.textContent = student;
+                    btn.className = 'quick-btn';
+                    btn.onclick = () => {
+                        select.value = student;
+                    };
+                    quickSelect.appendChild(btn);
+                });
+                
+                if (students.length === 0) {
+                    showMessage('No students registered yet. Please register first.', 'error');
+                }
+            } catch (error) {
+                showMessage('Error loading students: ' + error.message, 'error');
+            }
+        }
+
+        async function markAttendance() {
+            const studentName = document.getElementById('studentSelect').value;
+            
+            if (!studentName) {
+                showMessage('Please select a student', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/mark_attendance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: studentName })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('✓ ' + data.message, 'success');
+                    document.getElementById('studentSelect').value = '';
+                } else {
+                    showMessage('✗ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = text;
+            messageDiv.className = 'message ' + type;
+        }
+
+        // Load students on page load
+        loadStudents();
+    </script>
+</body>
+</html>

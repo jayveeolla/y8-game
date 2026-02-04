@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .stat-card h3 {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .filter-input:focus {
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Attendance Records</h1>
+            <p>View and manage attendance history</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn">Mark Attendance</a>
+            <a href="/register" class="nav-btn">Register Student</a>
+            <a href="/records" class="nav-btn">View Records</a>
+        </div>
+
+        <div class="card">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Total Records</h3>
+                    <div class="number" id="totalRecords">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Today's Attendance</h3>
+                    <div class="number" id="todayRecords">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Registered Students</h3>
+                    <div class="number" id="registeredStudents">0</div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <input type="text" id="searchName" class="filter-input" placeholder="Search by name...">
+                <input type="date" id="filterDate" class="filter-input">
+                <button class="btn" onclick="loadRecords()">Refresh</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTable">
+                        <tr>
+                            <td colspan="5" class="loading">Loading records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allRecords = [];
+
+        async function loadRecords() {
+            try {
+                const recordsResponse = await fetch('/api/attendance_records');
+                allRecords = await recordsResponse.json();
+                
+                const studentsResponse = await fetch('/api/registered_students');
+                const students = await studentsResponse.json();
+                
+                updateStats(allRecords, students);
+                displayRecords(allRecords);
+            } catch (error) {
+                document.getElementById('recordsTable').innerHTML = 
+                    '<tr><td colspan="5" class="no-records">Error loading records: ' + error.message + '</td></tr>';
+            }
+        }
+
+        function updateStats(records, students) {
+            document.getElementById('totalRecords').textContent = records.length;
+            document.getElementById('registeredStudents').textContent = students.length;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayCount = records.filter(r => r.date === today).length;
+            document.getElementById('todayRecords').textContent = todayCount;
+        }
+
+        function displayRecords(records) {
+            const searchName = document.getElementById('searchName').value.toLowerCase();
+            const filterDate = document.getElementById('filterDate').value;
+            
+            let filteredRecords = records;
+            
+            if (searchName) {
+                filteredRecords = filteredRecords.filter(r => 
+                    r.name.toLowerCase().includes(searchName)
+                );
+            }
+            
+            if (filterDate) {
+                filteredRecords = filteredRecords.filter(r => 
+                    r.date === filterDate
+                );
+            }
+            
+            filteredRecords.sort((a, b) => {
+                const dateA = new Date(a.timestamp);
+                const dateB = new Date(b.timestamp);
+                return dateB - dateA;
+            });
+            
+            const tbody = document.getElementById('recordsTable');
+            
+            if (filteredRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="no-records">No records found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredRecords.map((record, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><strong>${record.name}</strong></td>
+                    <td>${formatDate(record.date)}</td>
+                    <td>${record.time}</td>
+                    <td><span class="badge badge-success">Present</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        document.getElementById('searchName').addEventListener('input', () => {
+            displayRecords(allRecords);
+        });
+
+        document.getElementById('filterDate').addEventListener('change', () => {
+            displayRecords(allRecords);
+        });
+
+        loadRecords();
+        setInterval(loadRecords, 30000);
+    </script>
+</body>
+</html>

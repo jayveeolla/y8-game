@@ -1,0 +1,24 @@
+[
+    {
+        "emp_id": "01025134",
+        "name": "Jayvee Olla",
+        "location": "GATE 3",
+        "shift": "L4",
+        "date": "2026-02-02",
+        "time_in": "07:58:43",
+        "time_out": "08:00:39",
+        "status": "Complete",
+        "timestamp": "2026-02-02T07:58:43.968427"
+    },
+    {
+        "emp_id": "01022345",
+        "name": "Ivan Constante",
+        "location": "Tagaytay",
+        "shift": "L4",
+        "date": "2026-02-02",
+        "time_in": "08:07:22",
+        "time_out": null,
+        "status": "Pending",
+        "timestamp": "2026-02-02T08:07:22.808908"
+    }
+]
