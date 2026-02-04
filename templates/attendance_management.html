@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+         .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header h1::before {
+            content: '📊';
+            font-size: 55px;
+        }
+ @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+       
+        h1::before {
+            content: '📊';
+            font-size: 50px;
+            -webkit-text-fill-color: initial;
+            filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+        }
+
+        .filter-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        label::before {
+            content: '▶';
+            color: #667eea;
+            font-size: 10px;
+        }
+
+        input[type="date"], input[type="text"] {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        input[type="date"]:focus, input[type="text"]:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+            outline: none;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn i {
+            font-size: 18px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: all 0.3s;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transform: scale(1.01);
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(102, 126, 234, 0.03);
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-complete {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .employee-detail {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .employee-detail h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 14px 32px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #667eea;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn i {
+            font-size: 18px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            background: white;
+            color: #667eea;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 10px 20px;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Pagination Styles */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 10px 16px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: #0061aa;
+            color: white;
+            border-color: #0061aa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,97,170,0.3);
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #0061aa 0%, #004d8a 100%);
+            color: white;
+            border-color: #0061aa;
+            box-shadow: 0 4px 15px rgba(0,97,170,0.4);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: #333;
+            font-weight: 600;
+            padding: 10px 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+          <div class="header">
+            <h1>Attendance Management</h1>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn"><i class="bi bi-house-door"></i> Home</a>
+            <a href="/register" class="nav-btn"><i class="bi bi-person-plus"></i> Register Employee</a>
+            <a href="/management" class="nav-btn"><i class="bi bi-bar-chart"></i> Attendance Management</a>
+            <a href="/manage_employees" class="nav-btn"><i class="bi bi-people"></i> Manage Employees</a>
+        </div>
+        <div class="filter-section">
+            <h3 style="margin-bottom: 15px;">Filter & Export</h3>
+            <div class="filter-row">
+                <div class="form-group">
+                    <label>Start Date:</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date:</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="form-group">
+                    <label>Employee ID:</label>
+                    <input type="text" id="filterEmpId" placeholder="Search by ID">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="filterRecords()">Filter</button>
+                    <button class="btn btn-success" onclick="exportToCSV()">📥 Export CSV</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <div id="employeeDetail" style="display: none;"></div>
+            
+            <h3>Attendance Records</h3>
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Shift</th>
+                        <th>Time IN</th>
+                        <th>Time OUT</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="8" class="no-records">Loading...</td></tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div id="pagination" class="pagination-controls">
+                <!-- Pagination buttons will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allRecords = [];
+        let filteredRecords = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        async function loadRecords() {
+            try {
+                const response = await fetch('/api/attendance');
+                allRecords = await response.json();
+                filteredRecords = allRecords;
+                currentPage = 1;
+                displayRecords();
+            } catch (error) {
+                console.error('Error loading records:', error);
+            }
+        }
+
+        function displayRecords() {
+            const tbody = document.getElementById('tableBody');
+            
+            if (filteredRecords.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-records">No records found</td></tr>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageRecords = filteredRecords.slice(startIndex, endIndex);
+
+            tbody.innerHTML = pageRecords.map(record => {
+                return `
+                    <tr>
+                        <td>${record.date}</td>
+                        <td><a href="#" onclick="viewEmployee('${record.emp_id}')" style="color: #0061aa; text-decoration: none; font-weight: bold;">${record.emp_id}</a></td>
+                        <td>${record.name}</td>
+                        <td>${record.location}</td>
+                        <td>${record.shift}</td>
+                        <td>${record.time_in || '-'}</td>
+                        <td>${record.time_out || '-'}</td>
+                        <td><span class="badge badge-${record.status.toLowerCase()}">${record.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+
+            renderPagination();
+        }
+
+        // Render pagination controls
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = `
+                <button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-left"></i> Previous
+                </button>
+            `;
+
+            // Show page numbers
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+            if (endPage - startPage < maxButtons - 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+
+            if (startPage > 1) {
+                paginationHTML += `<button class="pagination-btn" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) {
+                    paginationHTML += `<span class="pagination-info">...</span>`;
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHTML += `
+                    <button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `<span class="pagination-info">...</span>`;
+                }
+                paginationHTML += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+
+            paginationHTML += `
+                <button class="pagination-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Next <i class="bi bi-chevron-right"></i>
+                </button>
+                <span class="pagination-info">Page ${currentPage} of ${totalPages} (${filteredRecords.length} records)</span>
+            `;
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        // Change page
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            displayRecords();
+            
+            // Scroll to top of table
+            document.getElementById('attendanceTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function viewEmployee(empId) {
+            try {
+                const response = await fetch(`/api/employee/${empId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const emp = data.employee;
+                    const detailDiv = document.getElementById('employeeDetail');
+                    
+                    detailDiv.style.display = 'block';
+                    detailDiv.innerHTML = `
+                        <h3>Employee Details</h3>
+                        <div class="detail-row">
+                            <div class="detail-item">
+                                <img src="/api/employee_photo/${emp.emp_id}" 
+                                     style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 15px;"
+                                     onerror="this.style.display='none'">
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-item">
+                                <div class="detail-label">Employee ID</div>
+                                <div class="detail-value">${emp.emp_id}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Name</div>
+                                <div class="detail-value">${emp.name}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Location</div>
+                                <div class="detail-value">${emp.location}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Shift</div>
+                                <div class="detail-value">${emp.shift}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Filter records for this employee
+                    displayRecords(data.attendance);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function filterRecords() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const empId = document.getElementById('filterEmpId').value.trim().toLowerCase();
+
+            let filtered = allRecords;
+
+            if (startDate && endDate) {
+                filtered = filtered.filter(r => r.date >= startDate && r.date <= endDate);
+            }
+
+            if (empId) {
+                filtered = filtered.filter(r => r.emp_id.toLowerCase().includes(empId));
+            }
+
+            filteredRecords = filtered;
+            currentPage = 1;
+            displayRecords();
+        }
+
+        async function exportToCSV() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert('Please select start and end dates for export');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/export/csv', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start_date: startDate, end_date: endDate })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `attendance_${startDate}_to_${endDate}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    const data = await response.json();
+                    alert(data.message || 'Export failed');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Load records on page load
+        loadRecords();
+
+        // Set default dates to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').value = today;
+        document.getElementById('endDate').value = today;
+    </script>
+</body>
+</html>

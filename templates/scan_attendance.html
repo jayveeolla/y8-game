@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Attendance - Face Recognition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .video-container {
+            position: relative;
+            max-width: 640px;
+            margin: 0 auto 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            background: #000;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border: 3px solid #00ff00;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0,255,0,0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+                opacity: 0.8;
+            }
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            line-height: 2;
+            color: #555;
+        }
+
+        .attendance-type-selector {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .type-option {
+            flex: 1;
+            max-width: 250px;
+            padding: 30px;
+            border: 3px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            background: white;
+        }
+
+        .type-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .type-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .type-option .icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .type-option h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .type-option p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .type-option.selected p {
+            opacity: 1;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 50px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .result-card {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .result-card.success {
+            border-left: 5px solid #28a745;
+        }
+
+        .result-card.error {
+            border-left: 5px solid #dc3545;
+        }
+
+        .employee-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .employee-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+        }
+
+        .employee-details {
+            text-align: left;
+        }
+
+        .employee-details h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .employee-details p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px 5px 5px 0;
+        }
+
+        .badge-in {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-out {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-shift {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .scanning {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👤 Face Recognition Attendance</h1>
+            <p>Scan your face to mark attendance</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn">🏠 Home</a>
+            <a href="/register" class="nav-btn">➕ Register Employee</a>
+            <a href="/scan" class="nav-btn">📷 Scan Attendance</a>
+            <a href="/management" class="nav-btn">📊 Attendance Management</a>
+            <a href="/manage_employees" class="nav-btn">👥 Manage Employees</a>
+        </div>
+
+        <div class="card">
+            <div class="instructions">
+                <h3><span>📋</span> How to Mark Attendance</h3>
+                <ul>
+                    <li>✨ Select whether you're marking IN or OUT</li>
+                    <li>📹 Click "Start Camera" to begin</li>
+                    <li>👤 Position your face in the center of the camera view</li>
+                    <li>💡 Ensure good lighting for better recognition</li>
+                    <li>📸 Click "Scan Face" to mark your attendance</li>
+                </ul>
+            </div>
+
+            <h2 style="text-align: center; color: #667eea; margin-bottom: 20px;">Select Attendance Type</h2>
+            <div class="attendance-type-selector">
+                <div class="type-option" onclick="selectType('IN')" id="typeIN">
+                    <div class="icon">🟢</div>
+                    <h3>TIME IN</h3>
+                    <p>Mark your arrival</p>
+                </div>
+                <div class="type-option" onclick="selectType('OUT')" id="typeOUT">
+                    <div class="icon">🔴</div>
+                    <h3>TIME OUT</h3>
+                    <p>Mark your departure</p>
+                </div>
+            </div>
+
+            <div class="video-container" id="videoContainer" style="display: none;">
+                <video id="video" autoplay></video>
+                <div class="scan-overlay"></div>
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <div class="controls">
+                <button class="btn" id="startBtn" onclick="startCamera()">📹 Start Camera</button>
+                <button class="btn" id="scanBtn" onclick="scanFace()" style="display: none;" disabled>📸 Scan Face</button>
+                <button class="btn btn-stop" id="stopBtn" onclick="stopCamera()" style="display: none;">⏹️ Stop Camera</button>
+            </div>
+
+            <div id="scanningMessage" style="display: none;" class="scanning">
+                <div class="spinner"></div>
+                Recognizing face...
+            </div>
+
+            <div id="resultCard" class="result-card">
+                <!-- Result will be displayed here -->
+            </div>
+
+            <div id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const videoContainer = document.getElementById('videoContainer');
+        const startBtn = document.getElementById('startBtn');
+        const scanBtn = document.getElementById('scanBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resultCard = document.getElementById('resultCard');
+        const statusMessage = document.getElementById('statusMessage');
+        const scanningMessage = document.getElementById('scanningMessage');
+        
+        let stream = null;
+        let selectedType = null;
+
+        function selectType(type) {
+            selectedType = type;
+            document.getElementById('typeIN').classList.remove('selected');
+            document.getElementById('typeOUT').classList.remove('selected');
+            document.getElementById('type' + type).classList.add('selected');
+            showMessage(`${type} selected. Click Start Camera to continue.`, 'info');
+        }
+
+        async function startCamera() {
+            if (!selectedType) {
+                showMessage('⚠️ Please select IN or OUT first!', 'error');
+                return;
+            }
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                video.srcObject = stream;
+                
+                videoContainer.style.display = 'block';
+                startBtn.style.display = 'none';
+                scanBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'inline-block';
+                scanBtn.disabled = false;
+                
+                resultCard.style.display = 'none';
+                statusMessage.innerHTML = '';
+                
+                showMessage('Camera started! Position your face and click "Scan Face"', 'info');
+            } catch (error) {
+                showMessage('Error accessing camera: ' + error.message, 'error');
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+            
+            videoContainer.style.display = 'none';
+            startBtn.style.display = 'inline-block';
+            scanBtn.style.display = 'none';
+            stopBtn.style.display = 'none';
+            resultCard.style.display = 'none';
+            statusMessage.innerHTML = '';
+        }
+
+        async function scanFace() {
+            scanBtn.disabled = true;
+            resultCard.style.display = 'none';
+            scanningMessage.style.display = 'block';
+            statusMessage.innerHTML = '';
+
+            // Capture image
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            try {
+                const response = await fetch('/api/recognize_face', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        image: imageData,
+                        attendance_type: selectedType 
+                    })
+                });
+
+                const data = await response.json();
+                scanningMessage.style.display = 'none';
+
+                if (data.success) {
+                    displaySuccessResult(data);
+                } else {
+                    showMessage('✗ ' + data.message, 'error');
+                }
+            } catch (error) {
+                scanningMessage.style.display = 'none';
+                showMessage('Error: ' + error.message, 'error');
+            }
+
+            setTimeout(() => {
+                scanBtn.disabled = false;
+            }, 2000);
+        }
+
+        function displaySuccessResult(data) {
+            const employee = data.employee;
+            const attendanceType = data.attendance_type;
+            const badgeClass = attendanceType === 'IN' ? 'badge-in' : 'badge-out';
+            
+            resultCard.className = 'result-card success';
+            resultCard.style.display = 'block';
+            
+            resultCard.innerHTML = `
+                <div style="text-align: center;">
+                    <h2 style="color: #28a745; margin-bottom: 20px;">✓ Recognition Successful!</h2>
+                    <div class="employee-info">
+                        <img src="/api/employee_photo/${employee.emp_id}" class="employee-photo" alt="${employee.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/><text x=%2250%25%22 y=%2250%25%22 font-size=%2248%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22>${employee.name.charAt(0)}</text></svg>'">
+                        <div class="employee-details">
+                            <h3>${employee.name}</h3>
+                            <p><strong>ID:</strong> ${employee.emp_id}</p>
+                            <p><strong>Location:</strong> ${employee.location}</p>
+                            <div>
+                                <span class="badge badge-shift">${employee.shift}</span>
+                                <span class="badge ${badgeClass}">${attendanceType}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <p style="font-size: 18px; margin: 10px 0;"><strong>Time:</strong> ${data.time}</p>
+                        <p style="font-size: 16px; color: #666;"><strong>Confidence:</strong> ${data.confidence}%</p>
+                        ${data.recognition_method ? `<p style="font-size: 14px; color: #888; margin: 5px 0;"><strong>Algorithm:</strong> ${data.recognition_method}</p>` : ''}
+                        <p style="font-size: 20px; margin-top: 15px; color: #28a745; font-weight: bold;">${data.message}</p>
+                    </div>
+                </div>
+            `;
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                resultCard.style.display = 'none';
+            }, 5000);
+        }
+
+        function showMessage(text, type) {
+            statusMessage.innerHTML = `<div class="status-message ${type}">${text}</div>`;
+            
+            setTimeout(() => {
+                statusMessage.innerHTML = '';
+            }, 5000);
+        }
+
+        // Stop camera when leaving page
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>

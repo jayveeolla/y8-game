@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System - Home</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0061aa 0%, #0061aa 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            height: 100vh;
+            overflow: auto;
+        }
+
+        .left-panel {
+            background: white;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #0061aa 0%, #0061aa 100%);
+        }
+
+        .right-panel {
+            background: linear-gradient(135deg, #0061aa 0%, #0061aa 100%);
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .right-panel::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .right-panel::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -80px;
+            left: -80px;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 20px); }
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 25px;
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #0061aa 0%, #0061aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .form-section {
+            width: 100%;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        input {
+            width: 100%;
+            padding: 20px 24px;
+            font-size: 17px;
+            border: 3px solid #e5e7eb;
+            border-radius: 16px;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #f9fafb;
+            font-weight: 600;
+        }
+
+        input:focus {
+            border-color: #0061aa;
+            background: white;
+            box-shadow: 0 0 0 5px rgba(0, 97, 170, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 500px;
+            height: 500px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            color: white;
+            box-shadow: 0 12px 35px rgba(0, 97, 170, 0.5);
+            font-size: 20px;
+            padding: 22px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 45px rgba(102, 126, 234, 0.5);
+        }
+
+        .message {
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 25px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 15px;
+            line-height: 1.8;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+
+        .features-section {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: white;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 15px;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 35px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .quick-links a {
+            text-align: center;
+            padding: 18px 14px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #0061aa;
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #0061aa  100%);
+            transition: left 0.4s;
+            z-index: -1;
+        }
+
+        .quick-links a:hover::before {
+            left: 0;
+        }
+
+        .quick-links a:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            border-color: transparent;
+        }
+
+        .icon {
+            margin-right: 6px;
+        }
+
+        .status-dashboard {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .status-dashboard h3 {
+            margin-bottom: 20px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-tab {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .status-tab.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .status-tab:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .employee-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .employee-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .employee-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .employee-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .employee-id {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .employee-time {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-in {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-out {
+            background: #dc3545;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            opacity: 0.6;
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Left Panel - Form Section -->
+        <div class="left-panel">
+            <div class="header-section">
+                <div class="header-icon">📋</div>
+                <h1>Attendance System</h1>
+                <p class="subtitle">Enter your Employee ID to mark attendance</p>
+            </div>
+
+            <div class="form-section">
+                <div class="input-group">
+                    <label>Employee ID:</label>
+                    <input type="text" id="empId" placeholder="Enter your Employee ID" autofocus>
+                </div>
+
+                <button class="btn btn-primary" onclick="markAttendance()">
+                    <span>✓</span> Mark Attendance
+                </button>
+
+                <div id="message"></div>
+
+                <div class="quick-links">
+                    <a href="/register"><span class="icon">➕</span> Register</a>
+                    <a href="/manage_employees"><span class="icon">👥</span> Employees</a>
+                    <a href="/management"><span class="icon">📊</span> Records</a>
+                    <a href="/scan_faceapi"><span class="icon">📷</span>  Scan Face</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Features Section -->
+        <div class="right-panel">
+            <div class="features-section">
+                <!-- <a href="/scan" class="feature-card">
+                    <span class="feature-icon">📷</span>
+                    <div class="feature-title">Scan Face (OpenCV)</div>
+                    <div class="feature-desc">Advanced face recognition using OpenCV computer vision technology</div>
+                </a> -->
+
+                <a href="/scan_faceapi" class="feature-card">
+                    <span class="feature-icon">🤖</span>
+                    <div class="feature-title">Scan Face (Face-API.js)</div>
+                    <div class="feature-desc">AI-powered face detection with neural network models</div>
+                </a>
+
+                <a href="/register" class="feature-card">
+                    <span class="feature-icon">➕</span>
+                    <div class="feature-title">Register New Employee</div>
+                    <div class="feature-desc">Add new employees to the attendance system</div>
+                </a>
+
+                <!-- Employee Status Dashboard -->
+                <div class="status-dashboard">
+                    <h3>
+                        <span>👥</span> Employee Status
+                        <button class="refresh-btn" onclick="loadEmployeeStatus()" style="margin-left: auto;">🔄 Refresh</button>
+                    </h3>
+                    
+                    <div class="status-tabs">
+                        <div class="status-tab active" id="tabAll" onclick="filterStatus('all')">
+                            All (<span id="countAll">0</span>)
+                        </div>
+                        <div class="status-tab" id="tabIn" onclick="filterStatus('in')">
+                            🚪 Not In Yet (<span id="countIn">0</span>)
+                        </div>
+                        <div class="status-tab" id="tabOut" onclick="filterStatus('out')">
+                            💼 At Work (<span id="countOut">0</span>)
+                        </div>
+                    </div>
+                    
+                    <div class="employee-list" id="employeeList">
+                        <div class="empty-state">
+                            <div>🔍 Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function markAttendance() {
+            const empId = document.getElementById('empId').value.trim();
+            const messageDiv = document.getElementById('message');
+
+            if (!empId) {
+                messageDiv.innerHTML = '<strong>⚠️ Please enter your Employee ID</strong>';
+                messageDiv.className = 'message alert alert-danger-custom';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/mark_attendance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emp_id: empId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageDiv.innerHTML = `
+                        <strong>✓ ${data.message}</strong><br>
+                        <small><strong>Name:</strong> ${data.employee.name}</small><br>
+                        <small><strong>Status:</strong> ${data.status}</small><br>
+                        <small><strong>Time:</strong> ${data.time}</small>
+                    `;
+                    messageDiv.className = 'message alert alert-success-custom';
+                    document.getElementById('empId').value = '';
+                    
+                    // Reload employee status after 1 second
+                    setTimeout(loadEmployeeStatus, 1000);
+                } else {
+                    messageDiv.innerHTML = '<strong>✗ ' + data.message + '</strong>';
+                    messageDiv.className = 'message alert alert-danger-custom';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<strong>⚠️ Error: ' + error.message + '</strong>';
+                messageDiv.className = 'message alert alert-danger-custom';
+            }
+        }
+
+        // Enter key to submit
+        document.getElementById('empId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                markAttendance();
+            }
+        });
+
+        // Employee Status Management
+        let allEmployees = [];
+        let currentFilter = 'all';
+
+        async function loadEmployeeStatus() {
+            try {
+                const response = await fetch('/api/employee_status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allEmployees = data.employees;
+                    updateCounts();
+                    displayEmployees();
+                } else {
+                    document.getElementById('employeeList').innerHTML = 
+                        '<div class="empty-state">⚠️ Error loading data</div>';
+                }
+            } catch (error) {
+                console.error('Error loading employee status:', error);
+                document.getElementById('employeeList').innerHTML = 
+                    '<div class="empty-state">⚠️ Connection error</div>';
+            }
+        }
+
+        function updateCounts() {
+            // IN tab = Not clocked in yet today (status OUT or no time)
+            const notInYetCount = allEmployees.filter(e => e.status === 'OUT' || !e.time).length;
+            // OUT tab = Currently at work (status IN with time)
+            const atWorkCount = allEmployees.filter(e => e.status === 'IN' && e.time).length;
+            
+            document.getElementById('countAll').textContent = allEmployees.length;
+            document.getElementById('countIn').textContent = notInYetCount;
+            document.getElementById('countOut').textContent = atWorkCount;
+        }
+
+        function filterStatus(status) {
+            currentFilter = status;
+            
+            // Update active tab
+            document.querySelectorAll('.status-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('tab' + status.charAt(0).toUpperCase() + status.slice(1)).classList.add('active');
+            
+            displayEmployees();
+        }
+
+        function displayEmployees() {
+            let filtered = allEmployees;
+            
+            if (currentFilter === 'in') {
+                // Show employees who haven't clocked IN yet today
+                filtered = allEmployees.filter(e => e.status === 'OUT' || !e.time);
+            } else if (currentFilter === 'out') {
+                // Show employees currently at work (IN but not OUT)
+                filtered = allEmployees.filter(e => e.status === 'IN' && e.time);
+            }
+            
+            const listDiv = document.getElementById('employeeList');
+            
+            if (filtered.length === 0) {
+                const emptyMsg = currentFilter === 'in' ? '🎉 Everyone has clocked in!' :
+                                currentFilter === 'out' ? '🏠 No one is at work' :
+                                '👤 No employees found';
+                listDiv.innerHTML = `<div class="empty-state">${emptyMsg}</div>`;
+                return;
+            }
+            
+            listDiv.innerHTML = filtered.map(emp => {
+                let statusBadge, statusText;
+                if (emp.status === 'OUT' || !emp.time) {
+                    statusBadge = 'status-out';
+                    statusText = 'Not In Yet';
+                } else {
+                    statusBadge = 'status-in';
+                    statusText = 'At Work';
+                }
+                
+                return `
+                <div class="employee-item">
+                    <div class="employee-info">
+                        <div class="employee-name">${emp.name}</div>
+                        <div class="employee-id">ID: ${emp.emp_id}</div>
+                        ${emp.time ? `<div class="employee-time">🕒 ${emp.time}</div>` : '<div class="employee-time">⏰ No attendance yet</div>'}
+                    </div>
+                    <span class="status-badge ${statusBadge}">${statusText}</span>
+                </div>
+            `;
+            }).join('');
+        }
+
+        // Load status on page load and refresh every 30 seconds
+        loadEmployeeStatus();
+        setInterval(loadEmployeeStatus, 30000);
+
+        // Reload status after marking attendance
+        const originalMarkAttendance = markAttendance;
+        markAttendance = async function() {
+            await originalMarkAttendance();
+            setTimeout(loadEmployeeStatus, 1000);
+        };
+    </script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
